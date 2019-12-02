@@ -1,0 +1,29 @@
+.dl-horizontal {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin: 0;
+  min-height: 40px;
+  line-height: 1.5;
+
+  &+& {
+    padding-top: 5px;
+  }
+
+  dt {
+    font-size: 14px;
+    min-width: 92px;
+    text-align: right;
+    color: rgba(#fff, .5);
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    padding-right: 20px;
+  }
+
+  dd {
+    -webkit-box-flex: 1;
+    -ms-flex: 1;
+    flex: 1;
+    margin: 0;
+  }
+}

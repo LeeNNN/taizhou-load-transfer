@@ -1,0 +1,10 @@
+.container {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
+  overflow: auto;
+  min-height: calc(100vh - 96px);
+  -ms-flex-line-pack: stretch;
+  align-content: stretch;
+}

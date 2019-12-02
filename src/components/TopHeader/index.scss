@@ -1,0 +1,46 @@
+.top {
+  background: url('../../assets/images/bg_top_l.png') left center no-repeat, url('../../assets/images/bg_top_r.png') right center no-repeat;
+  // background-image: url('../../assets/images/bg_top_l.png'), url('../../assets/images/bg_top_r.png');
+  // background-position: left center, right center;
+  // background-repeat: no-repeat, no-repeat;
+  background-color: #1f2f4a;
+  // padding: 0 20px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  color: #fff;
+
+  h3 {
+    font-size: 20px;
+    letter-spacing: 3px;
+    color: #fff;
+    margin: 0;
+  }
+}
+
+.logout {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+
+  p {
+    margin: 0;
+    padding-right: 16px;
+  }
+
+  .logout {
+    cursor: pointer;
+  }
+}

@@ -1,0 +1,44 @@
+.v-card {
+  .ant-card-head {
+    border-bottom-color: rgba(#fff, 0.25);
+  }
+
+  .tag-height {
+    line-height: 26px;
+    padding: 0 20px;
+
+    &:hover {
+      cursor: pointer;
+    }
+  }
+
+}
+
+.analysis {
+  width: 400px;
+
+  .ant-popover-inner-content {
+    background: #2f3957;
+    border: solid 1px #4c5672;
+    border-radius: 3px;
+    overflow: hidden;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    -ms-border-radius: 3px;
+    -o-border-radius: 3px;
+    -webkit-box-shadow: 0 5px 5px 0 #0054b8;
+    box-shadow: 0 2px 5px 0 #0054b8;
+  }
+
+  .ant-popover-placement-bottom>.ant-popover-content>.ant-popover-arrow,
+  .ant-popover-placement-bottomLeft>.ant-popover-content>.ant-popover-arrow,
+  .ant-popover-placement-bottomRight>.ant-popover-content>.ant-popover-arrow {
+    border-left-color: #2f3957 !important;
+    border-top-color: #2f3957 !important;
+  }
+
+  .ant-popover-arrow {
+    border-left-color: #2f3957 !important;
+    border-top-color: #2f3957 !important;
+  }
+}

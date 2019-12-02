@@ -1,0 +1,16 @@
+.tree {
+  height: calc(100vh - 64px);
+  overflow: auto;
+}
+
+.nav-menu {
+  background: #0d2944;
+
+  .ant-menu-submenu-arrow {
+
+    &::before,
+    &::after {
+      visibility: hidden;
+    }
+  }
+}
