@@ -3,20 +3,63 @@
     border-bottom-color: rgba(#fff, 0.25);
   }
 
-  .tag-height {
+  .btn-height {
     line-height: 26px;
-    padding: 0 20px;
 
-    &:hover {
-      cursor: pointer;
+    &+.btn-height {
+      margin-left: 8px;
+    }
+
+    &.ant-btn-success {
+      background-color: #36a18d;
+      border-color: #36a18d;
+      color: #fff;
+
+      &:hover {
+        background-color: lighten(#36a18d, 10);
+      }
+    }
+
+    &.ant-btn-disabled,
+    &.ant-btn.disabled,
+    &.ant-btn[disabled],
+    &.ant-btn-disabled:hover,
+    &.ant-btn.disabled:hover,
+    &.ant-btn[disabled]:hover,
+    &.ant-btn-disabled:focus,
+    &.ant-btn.disabled:focus,
+    &.ant-btn[disabled]:focus,
+    &.ant-btn-disabled:active,
+    &.ant-btn.disabled:active,
+    &.ant-btn[disabled]:active,
+    &.ant-btn-disabled.active,
+    &.ant-btn.disabled.active,
+    &.ant-btn[disabled].active,
+    .ant-btn-disabled,
+    .ant-btn.disabled,
+    .ant-btn[disabled],
+    .ant-btn-disabled:hover,
+    .ant-btn.disabled:hover,
+    .ant-btn[disabled]:hover,
+    .ant-btn-disabled:focus,
+    .ant-btn.disabled:focus,
+    .ant-btn[disabled]:focus,
+    .ant-btn-disabled:active,
+    .ant-btn.disabled:active,
+    .ant-btn[disabled]:active,
+    .ant-btn-disabled.active,
+    .ant-btn.disabled.active,
+    .ant-btn[disabled].active {
+      background-color: rgba(0, 0, 0, .4) !important;
+      color: #bbb !important;
+      border-color: rgba(0, 0, 0, .5) !important;
     }
   }
+
 
 }
 
 .analysis {
-  width: 400px;
-
   .ant-popover-inner-content {
     background: #2f3957;
     border: solid 1px #4c5672;

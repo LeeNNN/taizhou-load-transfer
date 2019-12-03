@@ -1,12 +1,19 @@
 .pop-analysis {
   position: relative;
   color: #fff;
-  padding: 10px;
 
   .pop-close {
     font-size: 16px;
     position: absolute;
     right: -5px;
     top: 0;
+  }
+
+  .pop-title {
+    border-bottom: solid 1px red;
+  }
+
+  .ant-typography.ant-typography-secondary {
+    color: rgba(255, 255, 255, .45);
   }
 }

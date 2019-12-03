@@ -68,5 +68,5 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
 
 
-##### "proxy": "http://192.168.2.37:18002"
+#####  "proxy": "http://192.168.2.195:8080/"
 ##### "proxy": "http://192.168.2.40:18800/"

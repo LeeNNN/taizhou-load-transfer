@@ -1,23 +1,28 @@
-import React, { Component } from "react"
+import React, { PureComponent } from "react"
 import axios from "axios"
-import { Card, Tag, Typography, Popover, Spin, Modal, message } from "antd"
+import { Card, Typography, Popover, Spin, Modal, message, Button } from "antd"
 import * as d3 from "d3"
 import PopoverModal from "./PopoverModal"
 import Container from "@/components/Container"
 import * as SVGConfig from "@/utils/svgConfig"
-import { getSvg } from "@/api/svg"
+import { getSvg, confessionAnalysis } from "@/api/svg"
 import { requestSvg } from "@/utils/request"
 import FileSvg from "./FileSvg"
 import "./index.scss"
 const { confirm } = Modal
 const { Text } = Typography
 
-export default class Secondary extends Component {
+export default class Secondary extends PureComponent {
   state = {
     lineId: null,
+    deviceId: null,
     visible: false,
-    loading: false,
-    svgHtml: null
+    spinning: false,
+    svgHtml: null,
+    connections: 0, // 断开开关的个数
+    deviceName: null,
+    analysis: { on: [], off: [], lines: [] },
+    loading: false
   }
 
   hide = () => {
@@ -27,12 +32,41 @@ export default class Secondary extends Component {
   }
 
   handleVisibleChange = visible => {
-    this.setState({ visible })
-    if (visible) {
-      console.log("转供分析")
+    this.setState({ loading: true })
+    const { lineId = null, deviceId = null } = this.state
+    console.log(lineId, deviceId)
+    console.time("startAnalysis")
+    // if (lineId && deviceId) {
+    // confessionAnalysis("115967692082511999", "PD_30700000_30700002@3070371@1").then(res => {
+    confessionAnalysis(lineId, deviceId).then(res => {
+      console.log("转供分析：", res)
+      if (res.analyse && res.analyse.length) {
+        console.timeEnd("startAnalysis")
+        const analysis = res.analyse.reduce((accu, curr) => {
+          accu.on.push(curr.switchOnCbLine + "-" + curr.switchOnCbName)
+          accu.off.push(curr.switchOutName)
+          accu.lines.push({ name: curr.lineName, cap: +curr.lineCap })
+          return accu
+        }, { on: [], off: [], lines: [] })
+        console.log(analysis)
+        this.setState({ analysis, visible })
+      } else {
+        // 转供分析失败
+        message.error(res.resultMsg)
+        // todo 是否调用重置事件
+        this.handleReset()
+      }
+    }).finally(() => {
+      this.setState({ loading: false })
+    })
+    // }
+
+    if (!visible) {
+      this.setState({ analysis: { on: [], off: [], lines: [] }, visible })
     }
   }
 
+  // 孤岛校核
   handleIslandCheck = () => {
     console.log("孤岛校核")
     console.log("孤岛", SVGConfig.svgConfig.lone_device)
@@ -41,20 +75,29 @@ export default class Secondary extends Component {
       d3.select("#" + key).selectAll("use").style("stroke", "orange").style("fill", "orange")
       d3.select("#" + key).selectAll("polygon").style("stroke", "orange")
     })
-
   }
 
-  handleAnalogPowerOutage (resultCallback) {
+  // 模拟停电
+  handleAnalogPowerOutage = resultCallback => {
+    const _this = this
+    let { connections } = this.state
+
     SVGConfig.startCutLine((deviceId, exist, statue, deviceName, deviceType) => {
-      console.log(deviceId, exist, statue, deviceName, deviceType)
+      // console.log(deviceId, exist, statue, deviceName, deviceType)
       // 只允许对负荷开关进行开闭合操作
       if ("loadbreakswitch" === deviceType) {
-        var message = statue ? "断开" : "连接"
+        const msg = statue ? "断开" : "连接"
+        console.log("======", connections)
+        if (connections > 0) {
+          return message.error("只能断开一个开关模拟停电和转供分析，请先闭合已经断开的开关！")
+        }
+        connections = statue ? ++connections : --connections
+        _this.setState({ connections, deviceId: statue ? deviceId : null, deviceName: statue ? deviceName : null })
+
         confirm({
           title: "设备状态切换?",
-          content: message + `【${ deviceName }】设备, 是否继续?`,
+          content: msg + `【${ deviceName }】设备, 是否继续?`,
           onOk () {
-            console.log(deviceId, exist, statue)
             SVGConfig.outUpdateCutLine(deviceId, exist, statue)
           }
         })
@@ -64,11 +107,13 @@ export default class Secondary extends Component {
 
   handleReset = () => {
     console.log("重置")
+    // 清空断开开关的个数为哦
+    this.setState({ connections: 0 })
     SVGConfig.resetConfigStatue()
   }
 
   getSvg = lineId => {
-    this.setState({ loading: true })
+    this.setState({ spinning: true })
     axios({
       url: "/resources/1.svg",
       method: "GET",
@@ -78,21 +123,20 @@ export default class Secondary extends Component {
     }).then(res => {
       // this.setState({
       //   svgHtml: res.data,
-      //   loading: false
+      //   spinning: false
       // })
-      SVGConfig.loadSvg("#svgapp", { svgUrl: "http://localhost:3000/resources/1.svg" }, [{ id: "PD_30500000_554082", isPower: true, default: false }], (error) => {
-        this.loading = false
+      SVGConfig.loadSvg("#svgapp", { svgUrl: "http://localhost:3001/resources/1.svg" }, [{ id: "PD_30500000_554082", isPower: true, default: false }], (error) => {
+        this.spinning = false
         if (error) {
           message.error("未获取到图模资源")
         } else {
           this.searchDeviceList = []
-          for (var key in SVGConfig.svgConfig.configs.devices) {
-            var device = SVGConfig.svgConfig.configs.devices[key]
+          for (let key in SVGConfig.svgConfig.configs.devices) {
+            const device = SVGConfig.svgConfig.configs.devices[key]
             this.searchDeviceList.push(device)
           }
-
         }
-        this.setState({ loading: false, svgHtml: res.data })
+        this.setState({ spinning: false, svgHtml: res.data })
       })
     })
     // 115967692082512943
@@ -101,9 +145,9 @@ export default class Secondary extends Component {
     //   requestSvg(res.svgUrl).then(res => {
     //     this.setState({
     //       svgHtml: res,
-    //       loading: false
+    //       spinning: false
     //     })
-    //     // this.loading = false
+    //     // this.spinning = false
     //     // if (res && res.data) {
     //     //   // 在点击🌲节点的时候， 就能获取到val.table了，但是只有在svg展示的时候，才能展示这些数据
     //     //   this.dealWithLineData(val.lineInfo)
@@ -118,34 +162,48 @@ export default class Secondary extends Component {
     this.getSvg()
   }
 
-  /* componentDidUpdate () {
+  componentDidUpdate () {
     const { currentNode: { ID = "" } } = this.props
     if (ID && ID !== this.state.lineId) {
-      this.setState({ lineId: ID })
+      this.setState({ lineId: ID, deviceName: null, deviceId: null })
       this.getSvg(ID)
     }
-  } */
+  }
 
   render () {
     // console.log(this.props)
-    const { loading = false, svgHtml } = this.state
+    const { spinning = false, svgHtml, deviceName = "", analysis, loading = false } = this.state
     return (
-      <Spin spinning={loading}>
+      <Spin spinning={spinning}>
         <Container>
           <Card
             title={
               <>
-                <Tag className="tag-height" color="#1c6ecf" onClick={this.handleIslandCheck}>孤岛校核</Tag>
-                <Tag className="tag-height" style={{ cursor: svgHtml ? "cursor" : "not-allowed" }} color="#1c6ecf" onClick={this.handleAnalogPowerOutage}>停电模拟</Tag>
+                <Button
+                  className="btn-height"
+                  disabled={!!svgHtml}
+                  type="primary"
+                  onClick={this.handleIslandCheck}
+                >孤岛校核</Button>
+                <Button
+                  className="btn-height"
+                  type="primary"
+                  onClick={this.handleAnalogPowerOutage}
+                >停电模拟</Button>
                 <Popover
                   overlayClassName="analysis"
-                  content={<PopoverModal onClose={this.hide} />}
+                  content={<PopoverModal onClose={this.hide} deviceName={deviceName} analysis={analysis} />}
                   placement="bottom"
                   trigger="click"
                   visible={this.state.visible}
                   onVisibleChange={this.handleVisibleChange}
                 >
-                  <Tag className="tag-height" color="#36a18d">转供分析</Tag>
+                  <Button
+                    className="btn-height"
+                    type="success"
+                    loading={loading}
+                    disabled={!deviceName}
+                  >转供分析</Button>
                 </Popover>
                 <Text
                   style={{ fontSize: 12, lineHeight: "20px", padding: "0 17px", cursor: "pointer", color: "#ccc" }}
@@ -161,7 +219,7 @@ export default class Secondary extends Component {
             <div id="svgapp"></div>
           </Card>
         </Container>
-      </Spin>
+      </Spin >
     )
   }
 }
