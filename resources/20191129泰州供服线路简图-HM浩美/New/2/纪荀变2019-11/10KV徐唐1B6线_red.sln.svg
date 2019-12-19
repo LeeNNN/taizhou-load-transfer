@@ -1,0 +1,2140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg width="1820" height="1375" viewBox="0 0 1820 1375" onload="init(evt)" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cge="http://iec.ch/TC57/2005/SVG-schema#">
+    <style type="text/css">
+        <![CDATA[]]>
+    </style>
+    <script type="text/ecmascript">
+        var transMatrix = [1, 0, 0, 1, 0, 0];
+        function clickChild(evt){window.parent.clickChild(evt);}
+        function init(evt) {
+        if (window.svgDocument == null) {
+        svgDoc = evt.target.ownerDocument;
+        }
+        mapMatrix = svgDoc.getElementById(&quot;map-matrix&quot;);
+        clientWidth = svgDoc.documentElement.clientWidth;
+        clientHeight = svgDoc.documentElement.clientHeight;
+        getlayer(svgDoc);
+        addEvent(mapMatrix);
+        width = mapMatrix.firstElementChild.width.animVal.value;
+        height = mapMatrix.firstElementChild.height.animVal.value;
+        transMatrix[0] = 1;
+        transMatrix[3] = 1;
+        transMatrix[4] = -(width/2)+(clientWidth/2);
+        transMatrix[5] = -(height/2)+(clientHeight/2);
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);
+        zoomIn(clientHeight/height);
+        }
+        function addEvent(mapMatrix) {
+        if(document.addEventListener){
+        mapMatrix.addEventListener(&apos;DOMMouseScroll&apos;,mousewheel,false);}
+        mapMatrix.setAttribute(&quot;onmousewheel&quot;, &quot;mousewheel(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmouseup&quot;, &quot;mouseup(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousedown&quot;, &quot;mousedown(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousemove&quot;,&quot;mousemove(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousemout&quot;, &quot;mousemout(evt)&quot;);
+        }
+        function mousewheel(evt) {
+        if (evt.wheelDelta) {
+        console.log(evt.wheelDelta);
+        if (evt.wheelDelta == 120) {
+        zoomOut(1.25);
+        }else if(evt.wheelDelta == 180){
+        zoomOut(1.25);
+        } else {
+        zoomIn(0.8);
+        }
+        } else if (evt.detail) {
+        if (evt.detail == -3) {
+        zoomOut(1.25);
+        } else {
+        zoomIn(0.8);}}}
+        var downx = 0;var downy = 0;var downclick = 0;var movex = transMatrix[4];var movey = transMatrix[5];
+        function mouseup(evt) {
+        var oEvent = evt || event;
+        var x = (oEvent.clientX - downx);
+        var y = (oEvent.clientY - downy);
+        movex += x;
+        movey += y;
+        downclick = 0;downx = 0;downy = 0;}
+        function mousemout(evt) {
+        downclick = 0;downx = 0;downy = 0;}
+        function mousedown(evt) {
+        var oEvent = evt || event;
+        downclick = 1;
+        downx = oEvent.clientX;
+        downy = oEvent.clientY;}
+        function mousemove(evt) {
+        if (downclick == 1) {
+        var oEvent = evt || event;
+        var x = (oEvent.clientX - downx);
+        var y = (oEvent.clientY - downy);
+        transMatrix[4] = x + movex;
+        transMatrix[5] = y + movey;
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) +&quot;)&quot;;
+        mapMatrix.setAttributeNS(null,&quot;transform&quot;, newMatrix);}}
+        function getlayer(SvgMainMapDoc) {
+        var node = SvgMainMapDoc.documentElement;
+        findnode(node)}
+        function findnode(node) {
+        for (var i = 0; i &lt; node.childNodes.length; i++) {
+        if (node.childNodes.item(i).nodeType != 3 &amp;&amp; node.childNodes.item(i).nodeType != 4) {
+        var child = node.childNodes.item(i);
+        if (child.getAttribute(&quot;id&quot;) &amp;&amp; child.getAttribute(&quot;objid&quot;) != &quot;&quot; &amp;&amp; child.getAttribute(&quot;objid&quot;) != null) {
+        /*child.setAttribute(&quot;onclick&quot;, &quot;click(this)&quot;); */}
+        if (child.childNodes) {
+        findnode(child);
+        } else {
+        break;
+        }}}}
+        function click(evt) {
+        /*alert(evt.getAttribute(&quot;objid&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objtype&quot;)+&quot;_&quot;+evt.getAttribute(&quot;name&quot;)); */}
+        function move(evt){
+        var id = evt.getAttribute(&quot;objtype&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objid&quot;)
+        var node = svgDoc.documentElement;
+        opacity(node,&quot;1&quot;,id);}
+        function out(evt){
+        var id = evt.getAttribute(&quot;objtype&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objid&quot;)
+        var node = svgDoc.documentElement;
+        opacity(node,&quot;0&quot;,id); }
+        function opacity(node,value,id){
+        for (var i = 0; i &lt; node.childNodes.length; i++) {
+        if (node.childNodes.item(i).nodeType != 3 &amp;&amp; node.childNodes.item(i).nodeType != 4) {
+        var child = node.childNodes.item(i);
+        if (child.getAttribute(&quot;opacity&quot;) &amp;&amp; child.getAttribute(&quot;geoLabel&quot;) != null &amp;&amp;child.getAttribute(&quot;geoLabel&quot;) == id ) {
+        child.setAttribute(&quot;opacity&quot;, value);}
+        if (child.childNodes) {
+        opacity(child,value,id);
+        } else {
+        break;}}}}
+        function pan(dx, dy) {
+        transMatrix[4] += dx;
+        transMatrix[5] += dy;
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos;&apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+        function zoomIn(scale) {
+        console.log(scale);
+        if(transMatrix[0] &lt; 0.02 )
+        return;
+        for (var i = 0; i &lt; transMatrix.length; i++) {
+        transMatrix[i] *= scale;}
+        transMatrix[4] += (1 - scale) * clientWidth / 2;
+        transMatrix[5] += (1 - scale) * clientHeight / 2;
+        movex = transMatrix[4];
+        movey = transMatrix[5];
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+        function zoomOut(scale) {
+        console.log(scale);
+        if(transMatrix[0]&gt;10 ) 
+        return;
+        for (var i = 0; i &lt; transMatrix.length; i++) {
+        transMatrix[i] *= scale;}
+        transMatrix[4] += (1 - scale) * clientWidth / 2;
+        transMatrix[5] += (1 - scale) * clientHeight / 2;
+        movex = transMatrix[4];
+        movey = transMatrix[5];
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+    </script>
+    <defs>
+        <symbol id="TYPE[1627]" viewBox="0.0000 0.0000 2.0000 4.4280">
+            <circle cx="1.00039984" cy="3.053245369" r="0.9596001599" stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="rgb(255, 0, 0)" />
+            <circle cx="1" cy="1.396841263" r="0.9596001599" stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 0.397254 1.000000, 0.000053" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 4.052832 1.000000, 4.427909" />
+        </symbol>
+        <symbol id="Breaker_DMS_CXKG_@1" viewBox="0.0000 0.0000 2.0000 7.5086">
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="rgb(255, 0, 0)" points="0.000000, 1.254270 0.000000, 6.254290 2.000000, 6.254290 2.000000, 1.254270 0.000000, 1.254270" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 2.502853 1.000000, 0.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 5.005707 1.000000, 7.508560" />
+        </symbol>
+        <symbol id="Breaker_DMS_CXKG_@0" viewBox="0.0000 0.0000 2.1196 7.5000">
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 1.212060 1.059810, 0.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="0.000000, 1.225650 0.000000, 6.262610 2.082620, 6.262610 2.082620, 1.225650 0.000000, 1.225650" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 6.258430 1.059810, 7.500030" />
+        </symbol>
+        <symbol id="Breaker_11100000_2040010@1" viewBox="0.0000 0.0000 2.0000 9.0000">
+            <polygon stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="rgb(255, 0, 0)" points="0.000000, 2.500000 2.000000, 2.500000 2.000000, 6.500000 0.000000, 6.500000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="rgb(255, 255, 255)" points="1.000000, 2.500000 1.000000, 0.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 6.500000 1.000000, 9.000000" />
+        </symbol>
+        <symbol id="Breaker_11100000_2040010@0" viewBox="0.0000 0.0000 2.0000 9.0000">
+            <polygon stroke="rgb(0, 170, 0)" stroke-width="0.06666666667" fill="none" points="0.000000, 2.500000 2.000000, 2.500000 2.000000, 6.500000 0.000000, 6.500000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 2.500000 1.000000, 0.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 6.500000 1.000000, 9.000000" />
+        </symbol>
+        <symbol id="EnergyConsumer_57101704_3101704" viewBox="0.0000 0.0000 3.0000 3.0000">
+            <circle cx="1.5" cy="1.5" r="1.46" stroke="rgb(255, 0, 0)" stroke-width="0.1" fill="rgb(255, 255, 255)" />
+        </symbol>
+    </defs>
+    <g id="map-matrix" transform="matrix(1 0 0 1 0 0)">
+        <g id="bglayer">
+            <rect width="1820" x="0.0" height="1375" y="0.0" style="fill:#fff;" />
+        </g>
+        <g id="Other_Layer">
+            <g id="1651_32742">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="0.000000, -1074.634208 0.000000, 0.000000 1519.991808, 0.000000 1519.991808, -1074.634208 0.000000, -1074.634208" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Other_Layer" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Substation_Layer">
+            <g id="113997367362978028">
+                <polygon stroke="rgb(0, 0, 0)" stroke-width="1" fill="none" points="82.637701, -565.292962 306.637701, -565.292962 306.637701, -636.710420 82.637701, -636.710420 82.637701, -565.292962" node1="0" node2="0" _Dataid="113997367362978028" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectID="113997367362978028" ObjectName="纪荀变" PSRType="30000000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="ACLineSegment_Layer">
+            <g id="PD_20100000_1985717">
+                <polyline stroke="rgb(0, 0, 255)" stroke-width="7.5" fill="none" points="226.637701, -586.292962 353.137701, -586.292962" stroke-dasharray="25 8" node1="1567694" node2="1567695" _Dataid="PD_20100000_1985717" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417603" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_437091" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_1985717" ObjectName="纪荀变-徐唐线01" GlobeID="SBID0000001BF7E1E79B5C4834B14DA773ED1A7540" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417603">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="353.137701, -586.292962 359.037701, -586.292962" node1="1567695" node2="1567696" _Dataid="PD_10100000_36417603" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417606" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_1985717" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417603" ObjectName="徐唐线01-徐唐线02" GlobeID="SBID0000007A4E0980A69B4D1487491D7DBD3D4813" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417606">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="359.037701, -586.292962 392.961701, -586.292962" node1="1567696" node2="1567697" _Dataid="PD_10100000_36417606" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417603" />
+                    <cge:GLink_Ref ObjectID="PD_11100000_358381" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417606" ObjectName="徐唐线02-徐唐线03" GlobeID="SBID00000018384965D3364A619CB49D33DB873BC3" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417667">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="428.961701, -586.292962 462.887701, -586.292962" node1="1567698" node2="1567699" _Dataid="PD_10100000_36417667" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417669" />
+                    <cge:GLink_Ref ObjectID="PD_11100000_358381" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417667" ObjectName="徐唐线03-徐唐线04" GlobeID="SBID000000EB1B0CAEF2F4416AB03347354EE1E12C" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417669">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="462.887701, -586.292962 468.787701, -586.292962" node1="1567699" node2="1567700" _Dataid="PD_10100000_36417669" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417667" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417671" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417669" ObjectName="徐唐线04-徐唐线05" GlobeID="SBID000000D2BE70F5A1EB40C8A883532AE1425D00" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417671">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="468.787701, -586.292962 474.687701, -586.292962" node1="1567700" node2="1567701" _Dataid="PD_10100000_36417671" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417669" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417672" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417671" ObjectName="徐唐线05-徐唐线06" GlobeID="SBID0000006CD1CBF548FE47D89C1819500EE49474" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417672">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="474.687701, -586.292962 480.587701, -586.292962" node1="1567701" node2="1567702" _Dataid="PD_10100000_36417672" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417671" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417673" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417672" ObjectName="徐唐线06-徐唐线07" GlobeID="SBID000000DDEE6AAE724A4CE4910DD329E9F0ECF2" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417673">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="480.587701, -586.292962 486.487701, -586.292962" node1="1567702" node2="1567703" _Dataid="PD_10100000_36417673" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417672" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417705" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417673" ObjectName="徐唐线07-徐唐线08" GlobeID="SBID0000006EEEA2F41A5F4F54ACA41BA69937A01B" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417705">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="486.487701, -586.292962 492.387701, -586.292962" node1="1567703" node2="1567704" _Dataid="PD_10100000_36417705" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417673" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417706" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417705" ObjectName="徐唐线08-徐唐线09" GlobeID="SBID000000C633794FB4964A14AE4A769F8C18310F" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417706">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="492.387701, -586.292962 498.287701, -586.292962" node1="1567704" node2="1567705" _Dataid="PD_10100000_36417706" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417705" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417707" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417706" ObjectName="徐唐线09-徐唐线10" GlobeID="SBID000000474AEF7BDA7B41A096B89C3F534CD068" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417707">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="498.287701, -586.292962 504.187701, -586.292962" node1="1567705" node2="1567706" _Dataid="PD_10100000_36417707" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417706" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417744" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417707" ObjectName="徐唐线10-徐唐线11" GlobeID="SBID000000797681523FF74ACCBCD879DA6D0D8C74" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417744">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="504.187701, -586.292962 510.087701, -586.292962" node1="1567706" node2="1567707" _Dataid="PD_10100000_36417744" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417707" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417745" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417744" ObjectName="徐唐线11-徐唐线12" GlobeID="SBID000000EC04830B4984422CB4C356C7A8AAF52F" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417745">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="510.087701, -586.292962 515.987701, -586.292962" node1="1567707" node2="1567708" _Dataid="PD_10100000_36417745" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417744" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417789" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417745" ObjectName="徐唐线12-徐唐线13" GlobeID="SBID000000DE0FC8B38F8E4771933FF430E7A610DC" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417789">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="515.987701, -586.292962 521.887701, -586.292962" node1="1567708" node2="1567709" _Dataid="PD_10100000_36417789" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417745" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417790" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417789" ObjectName="徐唐线13-徐唐线14" GlobeID="SBID0000008C94A54F1F07414E8EAB8A07E1D714FA" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417790">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="521.887701, -586.292962 527.787701, -586.292962" node1="1567709" node2="1567710" _Dataid="PD_10100000_36417790" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417789" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417791" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417790" ObjectName="徐唐线14-徐唐线15" GlobeID="SBID00000098CDF0DA48824FD6BC94785C8681ABC2" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417791">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="527.787701, -586.292962 533.687701, -586.292962" node1="1567710" node2="1567711" _Dataid="PD_10100000_36417791" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417790" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417792" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417791" ObjectName="徐唐线15-徐唐线16" GlobeID="SBID0000005574C521D8EF48F3970E93E8A624014C" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417792">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="533.687701, -586.292962 539.587701, -586.292962" node1="1567711" node2="1567712" _Dataid="PD_10100000_36417792" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417791" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417793" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417792" ObjectName="徐唐线16-徐唐线17" GlobeID="SBID00000069CE96CD37CB47D995CAC6332005F596" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417793">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="539.587701, -586.292962 545.487701, -586.292962" node1="1567712" node2="1567713" _Dataid="PD_10100000_36417793" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417792" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417813" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417793" ObjectName="徐唐线17-徐唐线18" GlobeID="SBID00000016B1A6EAC12748D58FB86863883C16ED" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417813">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="545.487701, -586.292962 551.387701, -586.292962" node1="1567713" node2="1567714" _Dataid="PD_10100000_36417813" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417793" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417816" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417813" ObjectName="徐唐线18-徐唐线19" GlobeID="SBID00000090581DFC431F44E8B85503A2C1B7099E" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417816">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="551.387701, -586.292962 557.287701, -586.292962" node1="1567714" node2="1567715" _Dataid="PD_10100000_36417816" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417813" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417817" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417816" ObjectName="徐唐线19-徐唐线20" GlobeID="SBID000000D9C424C9CF9C41268B8A31A7E3EADE72" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417817">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="557.287701, -586.292962 563.187701, -586.292962" node1="1567715" node2="1567716" _Dataid="PD_10100000_36417817" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417816" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417818" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417817" ObjectName="徐唐线20-徐唐线21" GlobeID="SBID00000084129F9CE73E416BB49B221FF8FC35EC" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417818">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="563.187701, -586.292962 569.087701, -586.292962" node1="1567716" node2="1567717" _Dataid="PD_10100000_36417818" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417817" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417819" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417818" ObjectName="徐唐线21-徐唐线22" GlobeID="SBID000000B92D7C3B7FCF449583FC1689903AFD82" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417819">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="569.087701, -586.292962 574.987701, -586.292962" node1="1567717" node2="1567718" _Dataid="PD_10100000_36417819" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417818" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417820" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417819" ObjectName="徐唐线22-徐唐线23" GlobeID="SBID0000002FF031CA421446B99B7C4E1AA94E5D70" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417820">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="574.987701, -586.292962 580.887701, -586.292962" node1="1567718" node2="1567719" _Dataid="PD_10100000_36417820" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417819" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417821" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417820" ObjectName="徐唐线23-徐唐线24" GlobeID="SBID0000005DB329C49A434AB0A3E0EF9EB3453E69" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417821">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="580.887701, -586.292962 586.787701, -586.292962" node1="1567719" node2="1567720" _Dataid="PD_10100000_36417821" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417820" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417822" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417821" ObjectName="徐唐线24-徐唐线25" GlobeID="SBID0000003115B3BA14EA449FB9BBE11E13F6FCC6" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417822">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="586.787701, -586.292962 592.687701, -586.292962" node1="1567720" node2="1567721" _Dataid="PD_10100000_36417822" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417821" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417823" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417822" ObjectName="徐唐线25-徐唐线26" GlobeID="SBID000000A6B12A2DE0E1442595DE413B761B1874" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417823">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="592.687701, -586.292962 598.587701, -586.292962" node1="1567721" node2="1567722" _Dataid="PD_10100000_36417823" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417822" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417824" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417823" ObjectName="徐唐线26-徐唐线27" GlobeID="SBID00000049ABA465A037445298B075249A7B38C4" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417824">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="598.587701, -586.292962 604.487701, -586.292962" node1="1567722" node2="1567723" _Dataid="PD_10100000_36417824" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417823" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417826" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417824" ObjectName="徐唐线27-徐唐线28" GlobeID="SBID000000D947AAB2A3FA48D3AE309B4917EB608D" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417826">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="604.487701, -586.292962 610.387701, -586.292962" node1="1567723" node2="1567724" _Dataid="PD_10100000_36417826" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417824" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417827" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417826" ObjectName="徐唐线28-徐唐线29" GlobeID="SBID000000036899E8DD6249E28CC9CC571E437F5D" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417827">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="610.387701, -586.292962 616.287701, -586.292962" node1="1567724" node2="1567725" _Dataid="PD_10100000_36417827" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417826" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417828" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417827" ObjectName="徐唐线29-徐唐线30" GlobeID="SBID000000D724FC74BBFF466B814D96AB9F81BAE8" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417828">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="616.287701, -586.292962 622.187701, -586.292962" node1="1567725" node2="1567726" _Dataid="PD_10100000_36417828" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417827" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417829" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417828" ObjectName="徐唐线30-徐唐线31" GlobeID="SBID000000636D6D2A996C447DB03536C339DA98D4" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417829">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="622.187701, -586.292962 628.087701, -586.292962" node1="1567726" node2="1567727" _Dataid="PD_10100000_36417829" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417828" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417830" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417829" ObjectName="徐唐线31-徐唐线32" GlobeID="SBID000000CC22C5C0362342B1B198CE3C100AAF33" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417830">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="628.087701, -586.292962 633.987701, -586.292962" node1="1567727" node2="1567728" _Dataid="PD_10100000_36417830" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417829" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417831" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417830" ObjectName="徐唐线32-徐唐线33" GlobeID="SBID0000003EE5C39084A241D59B5E7C8FA3E2654E" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417831">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="633.987701, -586.292962 639.887701, -586.292962" node1="1567728" node2="1567729" _Dataid="PD_10100000_36417831" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417830" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417833" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417831" ObjectName="徐唐线33-徐唐线34" GlobeID="SBID0000004423E479B0BA4506888996C6327EFEF3" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417833">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="639.887701, -586.292962 645.787701, -586.292962" node1="1567729" node2="1567730" _Dataid="PD_10100000_36417833" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417831" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417851" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417833" ObjectName="徐唐线34-徐唐线35" GlobeID="SBID000000DE64E636B5934FD1B698A3C8AE73E9D4" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417851">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="645.787701, -586.292962 651.687701, -586.292962" node1="1567730" node2="1567731" _Dataid="PD_10100000_36417851" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417833" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417852" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417851" ObjectName="徐唐线35-徐唐线36" GlobeID="SBID000000F063686DF8124E47873E71A698B7CED3" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417852">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="651.687701, -586.292962 657.587701, -586.292962" node1="1567731" node2="1567732" _Dataid="PD_10100000_36417852" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417851" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417853" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417852" ObjectName="徐唐线36-徐唐线37" GlobeID="SBID000000D115387D043C40989D48A14B58D62A62" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417853">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="657.587701, -586.292962 663.487701, -586.292962" node1="1567732" node2="1567733" _Dataid="PD_10100000_36417853" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417852" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417854" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417853" ObjectName="徐唐线37-徐唐线38" GlobeID="SBID000000FDEDDE9483814529A5EAB4E1CBD3D990" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417854">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="663.487701, -586.292962 669.387701, -586.292962" node1="1567733" node2="1567734" _Dataid="PD_10100000_36417854" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417853" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417855" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417854" ObjectName="徐唐线38-徐唐线39" GlobeID="SBID000000656B190374864321B2C44FA6C5142EEA" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417855">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="669.387701, -586.292962 675.287701, -586.292962" node1="1567734" node2="1567735" _Dataid="PD_10100000_36417855" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417854" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417856" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417855" ObjectName="徐唐线39-徐唐线40" GlobeID="SBID000000BB685550516C46C49CABEE0272B5E6FB" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417856">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="675.287701, -586.292962 681.187701, -586.292962" node1="1567735" node2="1567736" _Dataid="PD_10100000_36417856" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417855" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417857" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417856" ObjectName="徐唐线40-徐唐线41" GlobeID="SBID000000057A3714904E4F29B42D964DE6A9862D" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417857">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="681.187701, -586.292962 687.087701, -586.292962" node1="1567736" node2="1567737" _Dataid="PD_10100000_36417857" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417856" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417858" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417857" ObjectName="徐唐线41-徐唐线42" GlobeID="SBID0000000C8A1B53628D4B03BA7C3BC5BFB9AF29" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417858">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="687.087701, -586.292962 692.987701, -586.292962" node1="1567737" node2="1567738" _Dataid="PD_10100000_36417858" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417857" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417859" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417858" ObjectName="徐唐线42-徐唐线43" GlobeID="SBID00000029D1D473F1CB4416AAE9CD5A48A668D5" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417859">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="692.987701, -586.292962 698.887701, -586.292962" node1="1567738" node2="1567739" _Dataid="PD_10100000_36417859" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417858" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417876" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417859" ObjectName="徐唐线43-徐唐线44" GlobeID="SBID000000612DC749437C49EFA03FF077F12DFC24" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417876">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="698.887701, -586.292962 704.787701, -586.292962" node1="1567739" node2="1567740" _Dataid="PD_10100000_36417876" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417859" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417877" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417876" ObjectName="徐唐线44-徐唐线45" GlobeID="SBID0000006B1733E91409474DBE9040491D110EEE" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417877">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="704.787701, -586.292962 710.687701, -586.292962" node1="1567740" node2="1567741" _Dataid="PD_10100000_36417877" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417876" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417878" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417877" ObjectName="徐唐线45-徐唐线46" GlobeID="SBID00000007D6B368C9654F278C4E9513A4D95F6A" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417878">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="710.687701, -586.292962 716.587701, -586.292962" node1="1567741" node2="1567742" _Dataid="PD_10100000_36417878" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417877" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417879" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417878" ObjectName="徐唐线46-徐唐线47" GlobeID="SBID0000001B6B7B6462A04F989C15591DB435CA47" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417879">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="716.587701, -586.292962 722.487701, -586.292962" node1="1567742" node2="1567743" _Dataid="PD_10100000_36417879" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417878" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417880" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417879" ObjectName="徐唐线47-徐唐线48" GlobeID="SBID000000329C983701224D6D8E7D5A07D04FDF2A" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417880">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="722.487701, -586.292962 728.387701, -586.292962" node1="1567743" node2="1567744" _Dataid="PD_10100000_36417880" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417879" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417881" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417880" ObjectName="徐唐线48-徐唐线49" GlobeID="SBID000000CEDBEE3947B7448CB55A9507C7A80D09" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36417881">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="728.387701, -586.292962 734.287701, -586.292962" node1="1567744" node2="1567745" _Dataid="PD_10100000_36417881" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591716" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144468" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417880" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36417881" ObjectName="徐唐线49-徐唐线50" GlobeID="SBID0000007263DF88EE664D08998DA928525AED24" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591716">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -586.292962 821.313701, -586.292962" node1="1567745" node2="1567746" _Dataid="PD_10100000_29591716" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_28491007" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144468" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417881" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591716" ObjectName="徐唐线51-徐唐线52" GlobeID="14000657785046" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144468">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -586.292962 734.287701, -592.192962" node1="1567745" node2="1567747" _Dataid="PD_10100000_30144468" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591716" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144469" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417881" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144468" ObjectName="GXD609281徐介线119~徐介线119-1" GlobeID="14000914019675" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_28491007">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="821.313701, -586.292962 827.213701, -586.292962" node1="1567746" node2="1567748" _Dataid="PD_10100000_28491007" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591545" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591716" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_28491007" ObjectName="徐唐线52-徐唐线53" GlobeID="14000657785049" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591545">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="827.213701, -586.292962 833.113701, -586.292962" node1="1567748" node2="1567749" _Dataid="PD_10100000_29591545" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_28491007" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591544" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591545" ObjectName="徐唐线53-徐唐线54" GlobeID="14000657785052" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591544">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="833.113701, -586.292962 839.013701, -586.292962" node1="1567749" node2="1567750" _Dataid="PD_10100000_29591544" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591543" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591545" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144568" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144582" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591544" ObjectName="徐唐线54-徐唐线55" GlobeID="14000657785055" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591543">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -586.292962 937.837701, -586.292962" node1="1567750" node2="1567751" _Dataid="PD_10100000_29591543" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591542" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591544" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144568" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144582" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591543" ObjectName="徐唐线55-徐唐线56" GlobeID="14000657785058" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144568">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -586.292962 839.013701, -580.392962" node1="1567750" node2="1567752" _Dataid="PD_10100000_30144568" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591543" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591544" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144569" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144582" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144568" ObjectName="徐唐线55-18-徐唐线55-19" GlobeID="14000914022868" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144582">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -586.292962 839.013701, -592.192962" node1="1567750" node2="1567753" _Dataid="PD_10100000_30144582" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591543" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591544" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144568" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144583" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144582" ObjectName="徐唐线55-18-徐唐线55-17" GlobeID="14000914024088" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591542">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="937.837701, -586.292962 943.737701, -586.292962" node1="1567751" node2="1567754" _Dataid="PD_10100000_29591542" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591541" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591543" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591542" ObjectName="徐唐线56-徐唐线57" GlobeID="14000657785061" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591541">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="943.737701, -586.292962 949.637701, -586.292962" node1="1567754" node2="1567755" _Dataid="PD_10100000_29591541" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591062" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591542" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591541" ObjectName="徐唐线57-徐唐线58" GlobeID="14000657785064" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591062">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="949.637701, -586.292962 955.537701, -586.292962" node1="1567755" node2="1567756" _Dataid="PD_10100000_29591062" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_28491008" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591541" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591062" ObjectName="徐唐线58-徐唐线59" GlobeID="14000657785067" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_28491008">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="955.537701, -586.292962 961.437701, -586.292962" node1="1567756" node2="1567757" _Dataid="PD_10100000_28491008" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591062" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591540" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_28491008" ObjectName="徐唐线59-徐唐线60" GlobeID="14000657785070" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591540">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="961.437701, -586.292962 967.337701, -586.292962" node1="1567757" node2="1567758" _Dataid="PD_10100000_29591540" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_28491008" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591539" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591540" ObjectName="徐唐线60-徐唐线61" GlobeID="14000657785073" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591539">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="967.337701, -586.292962 973.237701, -586.292962" node1="1567758" node2="1567759" _Dataid="PD_10100000_29591539" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591538" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591540" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591539" ObjectName="徐唐线61-徐唐线62" GlobeID="14000657785076" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591538">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="973.237701, -586.292962 979.137701, -586.292962" node1="1567759" node2="1567760" _Dataid="PD_10100000_29591538" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591537" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591539" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591538" ObjectName="徐唐线62-徐唐线63" GlobeID="14000657785079" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591537">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="979.137701, -586.292962 985.037701, -586.292962" node1="1567760" node2="1567761" _Dataid="PD_10100000_29591537" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591536" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591538" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591537" ObjectName="徐唐线63-徐唐线64" GlobeID="14000657785082" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591536">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="985.037701, -586.292962 990.937701, -586.292962" node1="1567761" node2="1567762" _Dataid="PD_10100000_29591536" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591535" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591537" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591536" ObjectName="徐唐线64-徐唐线65" GlobeID="14000657785085" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591535">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="990.937701, -586.292962 996.837701, -586.292962" node1="1567762" node2="1567763" _Dataid="PD_10100000_29591535" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591245" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591536" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591535" ObjectName="徐唐线65-徐唐线66" GlobeID="14000657785088" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591245">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="996.837701, -586.292962 1002.737701, -586.292962" node1="1567763" node2="1567764" _Dataid="PD_10100000_29591245" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_26677220" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_28490997" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591535" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144673" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3072084" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591245" ObjectName="徐唐线66-徐唐线67" GlobeID="14000657785091" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_26677220">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1002.737701, -586.292962 1008.987701, -592.542962" node1="1567764" node2="1567765" _Dataid="PD_10100000_26677220" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_26677226" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_28490997" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591245" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144673" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3072084" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_26677220" ObjectName="GXD630141141徐介线205~141徐介线205-01" GlobeID="14001113429494" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_28490997">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1002.737701, -586.292962 1002.737701, -632.017962" node1="1567764" node2="1567766" _Dataid="PD_10100000_28490997" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_26677220" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591245" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144673" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30387657" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3072084" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_28490997" ObjectName="徐唐线67-徐唐线68" GlobeID="14000263144515" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144673">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1002.737701, -586.292962 1113.363701, -586.292962" node1="1567764" node2="1567767" _Dataid="PD_10100000_30144673" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_26677220" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_28490997" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591245" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144674" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3072084" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144673" ObjectName="GXD609281徐介线135~徐介线135-1" GlobeID="14000914027244" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_26677226">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1008.987701, -592.542962 1014.887701, -592.542962" node1="1567765" node2="1567769" _Dataid="PD_10100000_26677226" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_26677220" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_26677229" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_26677226" ObjectName="徐唐线67-1-徐唐线67-2" GlobeID="14001113429497" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_26677229">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1014.887701, -592.542962 1020.787701, -592.542962" node1="1567769" node2="1567770" _Dataid="PD_10100000_26677229" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_26676756" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_26677226" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_26677229" ObjectName="徐唐线67-2-徐唐线67-3" GlobeID="14001113429500" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_26676756">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1020.787701, -592.542962 1026.687701, -592.542962" node1="1567770" node2="1567771" _Dataid="PD_10100000_26676756" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_26677229" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_26676756" ObjectName="徐唐线67-3-徐唐线67-4" GlobeID="14001113429503" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30387657">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1002.737701, -632.017962 1002.737701, -637.917962" node1="1567766" node2="1567772" _Dataid="PD_10100000_30387657" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_28490997" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591246" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30387657" ObjectName="徐唐线68-徐唐线69" GlobeID="14000263144518" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591246">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1002.737701, -637.917962 1002.737701, -643.817962" node1="1567772" node2="1567773" _Dataid="PD_10100000_29591246" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30387657" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3072083" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591246" ObjectName="徐唐线69-徐唐线70" GlobeID="14000263144521" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144674">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1113.363701, -586.292962 1119.263701, -586.292962" node1="1567767" node2="1567775" _Dataid="PD_10100000_30144674" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144673" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144675" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144674" ObjectName="徐唐线67-01-徐唐线67-02" GlobeID="14000914027247" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144675">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1119.263701, -586.292962 1125.163701, -586.292962" node1="1567775" node2="1567776" _Dataid="PD_10100000_30144675" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144674" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144676" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3418254" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144675" ObjectName="徐唐线67-02-徐唐线67-03" GlobeID="14000914027250" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144676">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1125.163701, -586.292962 1241.687701, -586.292962" node1="1567776" node2="1567777" _Dataid="PD_10100000_30144676" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144675" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144677" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3418254" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3521135" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144676" ObjectName="徐唐线67-03-徐唐线67-04" GlobeID="14000914027253" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144677">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1241.687701, -586.292962 1247.587701, -586.292962" node1="1567777" node2="1567779" _Dataid="PD_10100000_30144677" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144676" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144678" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3521135" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144677" ObjectName="徐唐线67-04-徐唐线67-05" GlobeID="14000914027256" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144678">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1247.587701, -586.292962 1253.487701, -586.292962" node1="1567779" node2="1567781" _Dataid="PD_10100000_30144678" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144677" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144679" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144678" ObjectName="徐唐线67-05-徐唐线67-06" GlobeID="14000914027259" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144679">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1253.487701, -586.292962 1259.387701, -586.292962" node1="1567781" node2="1567782" _Dataid="PD_10100000_30144679" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144678" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144680" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144679" ObjectName="徐唐线67-06-徐唐线67-07" GlobeID="14000914027262" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144680">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1259.387701, -586.292962 1265.287701, -586.292962" node1="1567782" node2="1567783" _Dataid="PD_10100000_30144680" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144679" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144681" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144680" ObjectName="徐唐线67-07-徐唐线67-08" GlobeID="14000914027265" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144681">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1265.287701, -586.292962 1271.187701, -586.292962" node1="1567783" node2="1567784" _Dataid="PD_10100000_30144681" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144680" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144682" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144681" ObjectName="徐唐线67-08-徐唐线67-09" GlobeID="14000914027268" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144682">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1271.187701, -586.292962 1277.087701, -586.292962" node1="1567784" node2="1567785" _Dataid="PD_10100000_30144682" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144681" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144683" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144682" ObjectName="徐唐线67-09-徐唐线67-10" GlobeID="14000914027271" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144683">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1277.087701, -586.292962 1282.987701, -586.292962" node1="1567785" node2="1567786" _Dataid="PD_10100000_30144683" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144682" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144684" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144683" ObjectName="徐唐线67-10-徐唐线67-11" GlobeID="14000914027274" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144684">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="1282.987701, -586.292962 1298.387701, -586.292962" node1="1567786" node2="1567787" _Dataid="PD_10100000_30144684" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144683" />
+                    <cge:GLink_Ref ObjectID="PD_37000000_178611" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144684" ObjectName="徐唐线67-11-徐唐线67-12" GlobeID="14000914027277" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144569">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -580.392962 839.013701, -574.492962" node1="1567752" node2="1567788" _Dataid="PD_10100000_30144569" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144568" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144570" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144569" ObjectName="徐唐线55-1-徐唐线55-2" GlobeID="14000914022871" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144570">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -574.492962 839.013701, -568.592962" node1="1567788" node2="1567789" _Dataid="PD_10100000_30144570" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144569" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144571" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144570" ObjectName="徐唐线55-2-徐唐线55-3" GlobeID="14000914022874" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144571">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -568.592962 839.013701, -562.692962" node1="1567789" node2="1567790" _Dataid="PD_10100000_30144571" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144570" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144572" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144571" ObjectName="徐唐线55-3-徐唐线55-4" GlobeID="14000914022877" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144572">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -562.692962 839.013701, -556.792962" node1="1567790" node2="1567791" _Dataid="PD_10100000_30144572" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144571" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144573" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144572" ObjectName="徐唐线55-4-徐唐线55-5" GlobeID="14000914022880" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144573">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -556.792962 839.013701, -550.892962" node1="1567791" node2="1567792" _Dataid="PD_10100000_30144573" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144572" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144574" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144573" ObjectName="徐唐线55-5-徐唐线55-6" GlobeID="14000914022883" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144574">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -550.892962 839.013701, -544.992962" node1="1567792" node2="1567793" _Dataid="PD_10100000_30144574" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144573" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144575" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144574" ObjectName="徐唐线55-6-徐唐线55-7" GlobeID="14000914022886" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144575">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -544.992962 839.013701, -539.092962" node1="1567793" node2="1567794" _Dataid="PD_10100000_30144575" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144574" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144576" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144575" ObjectName="徐唐线55-7-徐唐线55-8" GlobeID="14000914022889" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144576">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -539.092962 839.013701, -533.192962" node1="1567794" node2="1567795" _Dataid="PD_10100000_30144576" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144575" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144577" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144576" ObjectName="徐唐线55-8-徐唐线55-9" GlobeID="14000914022892" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144577">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -533.192962 839.013701, -527.292962" node1="1567795" node2="1567796" _Dataid="PD_10100000_30144577" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144576" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144578" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144577" ObjectName="徐唐线55-9-徐唐线55-10" GlobeID="14000914022895" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144578">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -527.292962 839.013701, -521.392962" node1="1567796" node2="1567797" _Dataid="PD_10100000_30144578" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144577" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144579" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144578" ObjectName="徐唐线55-10-徐唐线55-11" GlobeID="14000914022898" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144579">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -521.392962 839.013701, -501.392962" node1="1567797" node2="1567798" _Dataid="PD_10100000_30144579" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144578" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144580" />
+                    <cge:GLink_Ref ObjectID="PD_37000000_177979" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144579" ObjectName="徐唐线55-11-徐唐线55-12" GlobeID="14000914022901" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144580">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -501.392962 839.013701, -473.692962" node1="1567798" node2="1567799" _Dataid="PD_10100000_30144580" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144579" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144581" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135969" />
+                    <cge:GLink_Ref ObjectID="PD_37000000_177979" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144580" ObjectName="徐唐线55-12-徐唐线55-13" GlobeID="14000914022904" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144581">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -473.692962 854.413701, -473.692962" node1="1567799" node2="1567800" _Dataid="PD_10100000_30144581" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144580" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135969" />
+                    <cge:GLink_Ref ObjectID="PD_37000000_177937" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144581" ObjectName="徐唐线55-13-徐唐线55-14" GlobeID="14000914022907" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_37135969">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -473.692962 839.013701, -467.792962" node1="1567799" node2="1567801" _Dataid="PD_10100000_37135969" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144580" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144581" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135970" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_37135969" ObjectName="徐唐线55-13-徐唐线55-13-1" GlobeID="SBID000000BC7C0ECBC49B4574A0E05E3BF08F172C" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_37135970">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -467.792962 839.013701, -461.892962" node1="1567801" node2="1567802" _Dataid="PD_10100000_37135970" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135969" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135972" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_37135970" ObjectName="徐唐线55-13-1-徐唐线55-13-2" GlobeID="SBID00000009F73334E88B407ABC91C80309B5EE18" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_37135972">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -461.892962 839.013701, -455.992962" node1="1567802" node2="1567803" _Dataid="PD_10100000_37135972" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135970" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135974" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_37135972" ObjectName="徐唐线55-13-2-徐唐线55-13-3" GlobeID="SBID000000167831F648EA4750A2BE5E3B3714067D" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_37135974">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -455.992962 839.013701, -450.092962" node1="1567803" node2="1567804" _Dataid="PD_10100000_37135974" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135972" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135975" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_37135974" ObjectName="徐唐线55-13-3-徐唐线55-13-4" GlobeID="SBID000000E86DECFC940B45E182C0F5FB1204B5D6" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_37135975">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -450.092962 839.013701, -444.192962" node1="1567804" node2="1567805" _Dataid="PD_10100000_37135975" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135974" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135976" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_37135975" ObjectName="徐唐线55-13-4-徐唐线55-13-5" GlobeID="SBID0000003076BD6C95024945A980E08CD97D6811" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_37135976">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -444.192962 839.013701, -438.292962" node1="1567805" node2="1567806" _Dataid="PD_10100000_37135976" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135975" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135977" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_37135976" ObjectName="徐唐线55-13-5-徐唐线55-13-6" GlobeID="SBID000000D27C0F3EF92C4AAEAF75088528D0E36F" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_37135977">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -438.292962 839.013701, -432.392962" node1="1567806" node2="1567807" _Dataid="PD_10100000_37135977" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135976" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135978" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_37135977" ObjectName="徐唐线55-13-6-徐唐线55-13-7" GlobeID="SBID000000CB84C0EC9A2E4F77976C532332AA1EC5" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_37135978">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -432.392962 839.013701, -426.492962" node1="1567807" node2="1567808" _Dataid="PD_10100000_37135978" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135977" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135979" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_37135978" ObjectName="徐唐线55-13-7-徐唐线55-13-8" GlobeID="SBID000000E9C8A37575BF45389E11FB494650C729" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_37135979">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -426.492962 839.013701, -420.592962" node1="1567808" node2="1567809" _Dataid="PD_10100000_37135979" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135978" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135981" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_37135979" ObjectName="徐唐线55-13-8-徐唐线55-13-9" GlobeID="SBID0000007F0E99ADA2924316AA8A23ABC9A0E5EF" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_37135981">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -420.592962 839.013701, -414.692962" node1="1567809" node2="1567810" _Dataid="PD_10100000_37135981" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135979" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135983" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_37135981" ObjectName="徐唐线55-13-9-徐唐线55-13-10" GlobeID="SBID0000000D0CAA513C5A4F3F84AA7BECED69DD31" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_37135983">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -414.692962 839.013701, -408.792962" node1="1567810" node2="1567811" _Dataid="PD_10100000_37135983" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591247" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135981" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3574818" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_37135983" ObjectName="徐唐线55-13-10-徐唐线55-13-11" GlobeID="SBID00000009632D764217495DBC7097BAAFBB8C7B" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591247">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -408.792962 839.013701, -379.292962" node1="1567811" node2="1567812" _Dataid="PD_10100000_29591247" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591534" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135983" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3574818" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591247" ObjectName="-徐唐线55-13-12" GlobeID="14000263144524" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591534">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -379.292962 839.013701, -373.392962" node1="1567812" node2="1567814" _Dataid="PD_10100000_29591534" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591247" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591533" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591534" ObjectName="徐唐线55-13-12-徐唐线55-13-13" GlobeID="14000263144527" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591533">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -373.392962 839.013701, -367.492962" node1="1567814" node2="1567815" _Dataid="PD_10100000_29591533" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591532" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591534" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591533" ObjectName="徐唐线55-13-13-徐唐线55-13-14" GlobeID="14000263144530" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29591532">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -367.492962 839.013701, -361.592962" node1="1567815" node2="1567816" _Dataid="PD_10100000_29591532" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29532825" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591533" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29591532" ObjectName="徐唐线55-13-14-徐唐线55-13-15" GlobeID="14000263144533" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29532825">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -361.592962 839.013701, -355.692962" node1="1567816" node2="1567817" _Dataid="PD_10100000_29532825" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29532824" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591532" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29532825" ObjectName="徐唐线55-13-15-徐唐线55-13-16" GlobeID="14000263144536" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29532824">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -355.692962 839.013701, -349.792962" node1="1567817" node2="1567818" _Dataid="PD_10100000_29532824" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29532825" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30385942" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29532824" ObjectName="徐唐线55-13-16-徐唐线55-13-17" GlobeID="14000263144539" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30385942">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -349.792962 839.013701, -343.892962" node1="1567818" node2="1567819" _Dataid="PD_10100000_30385942" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29532824" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36613721" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30385942" ObjectName="徐唐线55-13-17-徐唐线55-13-18" GlobeID="14000666377154" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36613721">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -343.892962 839.013701, -337.992962" node1="1567819" node2="1567820" _Dataid="PD_10100000_36613721" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30385942" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36613722" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3521009" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36613721" ObjectName="徐唐线55-13-18-徐唐线55-13-19" GlobeID="SBID000000BFD76B6B52BE4FFC9CCC93633A6473C1" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36613722">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -337.992962 839.013701, -274.568962" node1="1567820" node2="1567821" _Dataid="PD_10100000_36613722" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36613721" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36613724" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3521009" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36613722" ObjectName="徐唐线55-13-19-徐唐线55-13-20" GlobeID="SBID00000050AA10585D5F4535A669526666A90701" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36613724">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -274.568962 839.013701, -268.668962" node1="1567821" node2="1567823" _Dataid="PD_10100000_36613724" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36613722" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36613725" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36613724" ObjectName="徐唐线55-13-20-徐唐线55-13-21" GlobeID="SBID00000043D8B2EEE1BA4B8082048FC04AC4080F" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36613725">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -268.668962 839.013701, -262.768962" node1="1567823" node2="1567824" _Dataid="PD_10100000_36613725" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29532823" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36613724" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36613725" ObjectName="徐唐线55-13-21-徐唐线55-13-22" GlobeID="SBID00000080BB16B2D2454D468E8B77AD546C09B5" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29532823">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -262.768962 839.013701, -256.868962" node1="1567824" node2="1567825" _Dataid="PD_10100000_29532823" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29532808" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36613725" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3555143" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29532823" ObjectName="徐唐线55-13-18-徐唐线55-13-23" GlobeID="14000666377157" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29532808">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -256.868962 839.013701, -250.968962" node1="1567825" node2="1567826" _Dataid="PD_10100000_29532808" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29532823" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3072081" />
+                    <cge:GLink_Ref ObjectID="PD_11000000_3555143" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29532808" ObjectName="徐唐线55-13-23-徐唐线55-13-24" GlobeID="14000666377160" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144583">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -592.192962 839.013701, -598.092962" node1="1567753" node2="1567829" _Dataid="PD_10100000_30144583" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144582" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144584" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144583" ObjectName="徐唐线55-001-徐唐线55-002" GlobeID="14000914024093" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144584">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -598.092962 839.013701, -603.992962" node1="1567829" node2="1567830" _Dataid="PD_10100000_30144584" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144583" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144585" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144584" ObjectName="徐唐线55-002-徐唐线55-003" GlobeID="14000914024098" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144585">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -603.992962 839.013701, -609.892962" node1="1567830" node2="1567831" _Dataid="PD_10100000_30144585" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144584" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144586" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144585" ObjectName="徐唐线55-003-徐唐线55-004" GlobeID="14000914024103" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144586">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -609.892962 839.013701, -615.792962" node1="1567831" node2="1567832" _Dataid="PD_10100000_30144586" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144585" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144661" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144586" ObjectName="徐唐线55-004-徐唐线55-005" GlobeID="14000914024108" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144661">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -615.792962 839.013701, -621.692962" node1="1567832" node2="1567833" _Dataid="PD_10100000_30144661" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144586" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144662" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144661" ObjectName="徐唐线55-005-徐唐线55-006" GlobeID="14000914024111" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144662">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -621.692962 839.013701, -627.592962" node1="1567833" node2="1567834" _Dataid="PD_10100000_30144662" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144661" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144663" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144662" ObjectName="徐唐线55-006-徐唐线55-007" GlobeID="14000914024114" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144663">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -627.592962 839.013701, -633.492962" node1="1567834" node2="1567835" _Dataid="PD_10100000_30144663" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144662" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144664" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144663" ObjectName="徐唐线55-007-徐唐线55-008" GlobeID="14000914024117" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144664">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -633.492962 839.013701, -639.392962" node1="1567835" node2="1567836" _Dataid="PD_10100000_30144664" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144663" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144665" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144664" ObjectName="徐唐线55-008-徐唐线55-009" GlobeID="14000914024120" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144665">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -639.392962 839.013701, -645.292962" node1="1567836" node2="1567837" _Dataid="PD_10100000_30144665" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144664" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144666" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144665" ObjectName="徐唐线55-009-徐唐线55-010" GlobeID="14000914024123" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144666">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -645.292962 839.013701, -665.292962" node1="1567837" node2="1567838" _Dataid="PD_10100000_30144666" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144665" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144667" />
+                    <cge:GLink_Ref ObjectID="PD_37000000_178035" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144666" ObjectName="徐唐线55-010-徐唐线55-011" GlobeID="14000914024126" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144667">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -665.292962 839.013701, -685.292962" node1="1567838" node2="1567839" _Dataid="PD_10100000_30144667" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144666" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144668" />
+                    <cge:GLink_Ref ObjectID="PD_37000000_178035" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144667" ObjectName="徐唐线55-011-徐唐线55-012" GlobeID="14000914024129" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144668">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -685.292962 839.013701, -691.192962" node1="1567839" node2="1567840" _Dataid="PD_10100000_30144668" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144667" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144669" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144668" ObjectName="徐唐线55-012-徐唐线55-013" GlobeID="14000914024132" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144669">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -691.192962 839.013701, -697.092962" node1="1567840" node2="1567841" _Dataid="PD_10100000_30144669" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144668" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144670" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144669" ObjectName="徐唐线55-013-徐唐线55-014" GlobeID="14000914024135" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144670">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -697.092962 839.013701, -702.992962" node1="1567841" node2="1567842" _Dataid="PD_10100000_30144670" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144669" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144671" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144670" ObjectName="徐唐线55-014-徐唐线55-015" GlobeID="14000914024141" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144671">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -702.992962 839.013701, -708.892962" node1="1567842" node2="1567843" _Dataid="PD_10100000_30144671" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144670" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144672" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144671" ObjectName="徐唐线55-015-徐唐线55-016" GlobeID="14000914024144" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144672">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="839.013701, -708.892962 839.013701, -728.892962" node1="1567843" node2="1567844" _Dataid="PD_10100000_30144672" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144671" />
+                    <cge:GLink_Ref ObjectID="PD_37000000_177952" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144672" ObjectName="徐唐线55-016-徐唐线55-017" GlobeID="14000914024147" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144469">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -592.192962 734.287701, -598.092962" node1="1567747" node2="1567845" _Dataid="PD_10100000_30144469" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144468" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144470" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144469" ObjectName="徐唐线51-01-徐唐线51-02" GlobeID="14000914019678" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144470">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -598.092962 734.287701, -603.992962" node1="1567845" node2="1567846" _Dataid="PD_10100000_30144470" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144469" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144471" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144470" ObjectName="徐唐线51-02-徐唐线51-03" GlobeID="14000914019681" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144471">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -603.992962 734.287701, -609.892962" node1="1567846" node2="1567847" _Dataid="PD_10100000_30144471" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144470" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144472" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144471" ObjectName="徐唐线51-03-徐唐线51-04" GlobeID="14000914019684" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144472">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -609.892962 734.287701, -615.792962" node1="1567847" node2="1567848" _Dataid="PD_10100000_30144472" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144471" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144473" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144472" ObjectName="徐唐线51-04-徐唐线51-05" GlobeID="14000914019687" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144473">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -615.792962 734.287701, -621.692962" node1="1567848" node2="1567849" _Dataid="PD_10100000_30144473" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144472" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144474" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144473" ObjectName="徐唐线51-05-徐唐线51-06" GlobeID="14000914019690" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144474">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -621.692962 734.287701, -627.592962" node1="1567849" node2="1567850" _Dataid="PD_10100000_30144474" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144473" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144475" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144474" ObjectName="徐唐线51-06-徐唐线51-07" GlobeID="14000914019693" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144475">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -627.592962 734.287701, -647.592962" node1="1567850" node2="1567851" _Dataid="PD_10100000_30144475" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144474" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144476" />
+                    <cge:GLink_Ref ObjectID="PD_37000000_178065" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144475" ObjectName="徐唐线51-07-徐唐线51-08" GlobeID="14000914019696" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144476">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -647.592962 734.287701, -667.592962" node1="1567851" node2="1567852" _Dataid="PD_10100000_30144476" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144475" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144477" />
+                    <cge:GLink_Ref ObjectID="PD_37000000_178065" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144476" ObjectName="徐唐线51-08-徐唐线51-09" GlobeID="14000914019699" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144477">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -667.592962 734.287701, -673.492962" node1="1567852" node2="1567853" _Dataid="PD_10100000_30144477" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144476" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144478" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144477" ObjectName="徐唐线51-09-徐唐线51-10" GlobeID="14000914019702" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144478">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -673.492962 734.287701, -679.392962" node1="1567853" node2="1567854" _Dataid="PD_10100000_30144478" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144477" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144479" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144478" ObjectName="徐唐线51-10-徐唐线51-11" GlobeID="14000914019705" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144479">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -679.392962 734.287701, -685.292962" node1="1567854" node2="1567855" _Dataid="PD_10100000_30144479" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144478" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144480" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144479" ObjectName="徐唐线51-11-徐唐线51-12" GlobeID="14000914019708" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144480">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -685.292962 734.287701, -691.192962" node1="1567855" node2="1567856" _Dataid="PD_10100000_30144480" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144479" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144481" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144480" ObjectName="徐唐线51-12-徐唐线51-13" GlobeID="14000914019711" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144481">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -691.192962 734.287701, -697.092962" node1="1567856" node2="1567857" _Dataid="PD_10100000_30144481" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144480" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144482" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144481" ObjectName="徐唐线51-13-徐唐线51-14" GlobeID="14000914019714" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144482">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -697.092962 734.287701, -702.992962" node1="1567857" node2="1567858" _Dataid="PD_10100000_30144482" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144481" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144483" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144482" ObjectName="徐唐线51-14-徐唐线51-15" GlobeID="14000914019717" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144483">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -702.992962 734.287701, -708.892962" node1="1567858" node2="1567859" _Dataid="PD_10100000_30144483" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144482" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144484" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144483" ObjectName="徐唐线51-15-徐唐线51-16" GlobeID="14000914019720" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144484">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -708.892962 734.287701, -714.792962" node1="1567859" node2="1567860" _Dataid="PD_10100000_30144484" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144483" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144485" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144484" ObjectName="徐唐线51-16-徐唐线51-17" GlobeID="14000914019723" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144485">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -714.792962 734.287701, -720.692962" node1="1567860" node2="1567861" _Dataid="PD_10100000_30144485" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144484" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144486" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144485" ObjectName="徐唐线51-17-徐唐线51-18" GlobeID="14000914019726" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144486">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -720.692962 734.287701, -740.692962" node1="1567861" node2="1567862" _Dataid="PD_10100000_30144486" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144485" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144487" />
+                    <cge:GLink_Ref ObjectID="PD_37000000_177921" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144486" ObjectName="徐唐线51-18-徐唐线51-19" GlobeID="14000914019729" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144487">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -740.692962 734.287701, -760.692962" node1="1567862" node2="1567863" _Dataid="PD_10100000_30144487" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144486" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144488" />
+                    <cge:GLink_Ref ObjectID="PD_37000000_177921" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144487" ObjectName="徐唐线51-19-徐唐线51-20" GlobeID="14000914019732" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144488">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -760.692962 734.287701, -766.592962" node1="1567863" node2="1567864" _Dataid="PD_10100000_30144488" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144487" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144489" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144488" ObjectName="徐唐线51-20-徐唐线51-21" GlobeID="14000914019735" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144489">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -766.592962 734.287701, -772.492962" node1="1567864" node2="1567865" _Dataid="PD_10100000_30144489" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144488" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144490" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144489" ObjectName="徐唐线51-21-徐唐线51-22" GlobeID="14000914019738" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144490">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -772.492962 734.287701, -778.392962" node1="1567865" node2="1567866" _Dataid="PD_10100000_30144490" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144489" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144491" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144490" ObjectName="徐唐线51-22-徐唐线51-23" GlobeID="14000914019741" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144491">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -778.392962 734.287701, -784.292962" node1="1567866" node2="1567867" _Dataid="PD_10100000_30144491" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144490" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144562" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144491" ObjectName="徐唐线51-23-徐唐线51-24" GlobeID="14000914019744" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144562">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -784.292962 734.287701, -790.192962" node1="1567867" node2="1567868" _Dataid="PD_10100000_30144562" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144491" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144563" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144562" ObjectName="徐唐线51-24-徐唐线51-25" GlobeID="14000914019747" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144563">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -790.192962 734.287701, -796.092962" node1="1567868" node2="1567869" _Dataid="PD_10100000_30144563" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144562" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144564" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144563" ObjectName="徐唐线51-25-徐唐线51-26" GlobeID="14000914019750" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144564">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -796.092962 734.287701, -801.992962" node1="1567869" node2="1567870" _Dataid="PD_10100000_30144564" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144563" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144565" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144564" ObjectName="徐唐线51-26-徐唐线51-27" GlobeID="14000914019753" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144565">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -801.992962 734.287701, -807.892962" node1="1567870" node2="1567871" _Dataid="PD_10100000_30144565" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144564" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144566" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144565" ObjectName="徐唐线51-27-徐唐线51-28" GlobeID="14000914019756" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144566">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -807.892962 734.287701, -813.792962" node1="1567871" node2="1567872" _Dataid="PD_10100000_30144566" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144565" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144567" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144566" ObjectName="徐唐线51-28-徐唐线51-29" GlobeID="14000914019759" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30144567">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="734.287701, -813.792962 734.287701, -833.792962" node1="1567872" node2="1567873" _Dataid="PD_10100000_30144567" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144566" />
+                    <cge:GLink_Ref ObjectID="PD_37000000_177905" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30144567" ObjectName="徐唐线51-29-徐唐线51-30" GlobeID="14000914019762" PSRType="10100000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="BusbarSection_Layer">
+            <g id="115404742246532143">
+                <polyline stroke="rgb(107, 61, 24)" stroke-width="10" fill="none" points="194.637701, -579.292962 194.637701, -593.292962" node1="1567691" node2="0" _Dataid="115404742246532143" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_437090" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectID="115404742246532143" ObjectName="泰州.纪荀变/10kV.10kVII段母线" GlobeID="115404742246532143" PSRType="31100000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="ConnLine_Layer">
+            <g id="PD_14000000_437090">
+                <polyline stroke="rgb(13, 113, 116)" stroke-width="5" fill="none" points="194.637701, -586.292962 196.637701, -586.292962" node1="1567691" node2="1567692" _Dataid="PD_14000000_437090" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="115404742246532143" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_644231" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_437090" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_437091">
+                <polyline stroke="rgb(13, 113, 116)" stroke-width="5" fill="none" points="224.637701, -586.292962 226.637701, -586.292962" node1="1567693" node2="1567694" _Dataid="PD_14000000_437091" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_20100000_1985717" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_644231" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_437091" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="PowerTransformer_Layer">
+            <g id="PD_11000000_3072084">
+                <use x="990.0097287" y="-599.0208343" width="2" height="4.427962148" transform="scale(8.130151, 8.130151) translate(-868.239573, 525.341902) rotate(134.999775, 990.009729, -599.020834)" xlink:href="#TYPE[1627]" node1="1567764" node2="1567768" _Dataid="PD_11000000_3072084" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_26677220" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_28490997" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591245" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144673" />
+                    <cge:Layer_Ref ObjectName="PowerTransformer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11000000_3072084" ObjectName="戴南镇冯田3#变" GlobeID="12000001914307" PSRType="11000000" />
+                </metadata>
+            </g>
+            <g id="PD_11000000_3072083">
+                <use x="1002.737701" y="-661.8179623" width="2" height="4.427962148" transform="scale(8.130151, 8.130151) translate(-879.402018, 580.415049) rotate(180.000000, 1002.737701, -661.817962)" xlink:href="#TYPE[1627]" node1="1567773" node2="1567774" _Dataid="PD_11000000_3072083" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591246" />
+                    <cge:Layer_Ref ObjectName="PowerTransformer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11000000_3072083" ObjectName="戴南镇冯田4#变" GlobeID="12000001913498" PSRType="11000000" />
+                </metadata>
+            </g>
+            <g id="PD_11000000_3418254">
+                <use x="1125.163701" y="-604.2929623" width="2" height="4.427962148" transform="scale(8.130151, 8.130151) translate(-986.769749, 529.965563) rotate(180.000000, 1125.163701, -604.292962)" xlink:href="#TYPE[1627]" node1="1567776" node2="1567778" _Dataid="PD_11000000_3418254" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144675" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144676" />
+                    <cge:Layer_Ref ObjectName="PowerTransformer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11000000_3418254" ObjectName="戴南镇冯田9#变" GlobeID="14001113431373" PSRType="11000000" />
+                </metadata>
+            </g>
+            <g id="PD_11000000_3521135">
+                <use x="1241.687701" y="-604.2929623" width="2" height="4.427962148" transform="scale(8.130151, 8.130151) translate(-1088.961419, 529.965563) rotate(180.000000, 1241.687701, -604.292962)" xlink:href="#TYPE[1627]" node1="1567777" node2="1567780" _Dataid="PD_11000000_3521135" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144676" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_30144677" />
+                    <cge:Layer_Ref ObjectName="PowerTransformer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11000000_3521135" ObjectName="戴南镇冯田12#变" GlobeID="86e549d7a9ff80808155838e00015586e541bb0bb4" PSRType="11000000" />
+                </metadata>
+            </g>
+            <g id="PD_11000000_3574818">
+                <use x="857.0137008" y="-408.7929623" width="2" height="4.427962148" transform="scale(8.130151, 8.130151) translate(-751.601917, 358.511858) rotate(270.000000, 857.013701, -408.792962)" xlink:href="#TYPE[1627]" node1="1567811" node2="1567813" _Dataid="PD_11000000_3574818" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29591247" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_37135983" />
+                    <cge:Layer_Ref ObjectName="PowerTransformer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11000000_3574818" ObjectName="戴南镇冯田2#变" GlobeID="95a7a563d38a06deec58496889015895a64f4d1a76" PSRType="11000000" />
+                </metadata>
+            </g>
+            <g id="PD_11000000_3521009">
+                <use x="857.0137008" y="-337.9929623" width="2" height="4.427962148" transform="scale(8.130151, 8.130151) translate(-751.601917, 296.420183) rotate(270.000000, 857.013701, -337.992962)" xlink:href="#TYPE[1627]" node1="1567820" node2="1567822" _Dataid="PD_11000000_3521009" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36613721" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36613722" />
+                    <cge:Layer_Ref ObjectName="PowerTransformer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11000000_3521009" ObjectName="戴南镇冯田11#变" GlobeID="86c79d2bc9ff80808155838e00015586c7956b0b42" PSRType="11000000" />
+                </metadata>
+            </g>
+            <g id="PD_11000000_3555143">
+                <use x="857.0137008" y="-256.8689623" width="2" height="4.427962148" transform="scale(8.130151, 8.130151) translate(-751.601917, 225.274350) rotate(270.000000, 857.013701, -256.868962)" xlink:href="#TYPE[1627]" node1="1567825" node2="1567827" _Dataid="PD_11000000_3555143" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29532808" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29532823" />
+                    <cge:Layer_Ref ObjectName="PowerTransformer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11000000_3555143" ObjectName="戴南镇冯田10#变" GlobeID="14001180148052" PSRType="11000000" />
+                </metadata>
+            </g>
+            <g id="PD_11000000_3072081">
+                <use x="839.0137008" y="-232.9689623" width="2" height="4.427962148" transform="scale(8.130151, 8.130151) translate(-735.815898, 204.314025) rotate(0.000000, 839.013701, -232.968962)" xlink:href="#TYPE[1627]" node1="1567826" node2="1567828" _Dataid="PD_11000000_3072081" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29532808" />
+                    <cge:Layer_Ref ObjectName="PowerTransformer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11000000_3072081" ObjectName="戴南镇冯田1#变" GlobeID="12000001914298" PSRType="11000000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Breaker_Layer">
+            <g id="PD_30500000_644231">
+                <use x="210.6377008" y="-586.2929623" width="2.11962" height="7.50003" transform="scale(27.999888, 27.999888) translate(-202.196394, 568.603870) rotate(540.000000, 210.637701, -586.292962)" xlink:href="#Breaker_DMS_CXKG_@0" node1="1567692" node2="1567693" _Dataid="PD_30500000_644231" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_437090" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_437091" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_644231" ObjectName="泰州.纪荀变/10kV.徐唐1B6开关" GlobeID="114560317316407030" PSRType="30500000" />
+                </metadata>
+            </g>
+            <g id="PD_11100000_358381">
+                <use x="410.9617008" y="-586.2929623" width="2" height="9" transform="scale(11.560000, 11.560000) translate(-374.757401, 538.518485) rotate(540.000000, 410.961701, -586.292962)" xlink:href="#Breaker_11100000_2040010@1" node1="1567697" node2="1567698" _Dataid="PD_11100000_358381" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417606" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36417667" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11100000_358381" ObjectName="徐唐纪荀K1开关" GlobeID="5efb8f67a0ff8080815cd6d001015d5ef8308336fe" PSRType="11100000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="EnergyConsumer_Layer">
+            <g id="PD_37000000_178611">
+                <use x="1298.387701" y="-586.2929623" width="3" height="3" transform="scale(0.100000, 0.100000) translate(11685.489307, -5276.636660) rotate(-180.000000, 1298.387701, -586.292962)" xlink:href="#EnergyConsumer_57101704_3101704" node1="1567787" _Dataid="PD_37000000_178611" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="EnergyConsumer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_37000000_178611" ObjectName="冯田村排灌站(6#)5103612576" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_37000000_177979">
+                <use x="839.0137008" y="-501.3929623" width="3" height="3" transform="scale(0.100000, 0.100000) translate(7551.123307, -4512.536660) rotate(-180.000000, 839.013701, -501.392962)" xlink:href="#EnergyConsumer_57101704_3101704" node1="1567798" _Dataid="PD_37000000_177979" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="EnergyConsumer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_37000000_177979" ObjectName="冯田村排灌站(32#)5103612775" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_37000000_177937">
+                <use x="854.4137008" y="-473.6929623" width="3" height="3" transform="scale(0.100000, 0.100000) translate(7689.723307, -4263.236660) rotate(-180.000000, 854.413701, -473.692962)" xlink:href="#EnergyConsumer_57101704_3101704" node1="1567800" _Dataid="PD_37000000_177937" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="EnergyConsumer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_37000000_177937" ObjectName="冯田村排灌站(30#)5103612772" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_37000000_178035">
+                <use x="839.0137008" y="-665.2929623" width="3" height="3" transform="scale(0.100000, 0.100000) translate(7551.123307, -5987.636660) rotate(-180.000000, 839.013701, -665.292962)" xlink:href="#EnergyConsumer_57101704_3101704" node1="1567838" _Dataid="PD_37000000_178035" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="EnergyConsumer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_37000000_178035" ObjectName="冯田村电灌站(3#)5103612561" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_37000000_177952">
+                <use x="839.0137008" y="-728.8929623" width="3" height="3" transform="scale(0.100000, 0.100000) translate(7551.123307, -6560.036660) rotate(-180.000000, 839.013701, -728.892962)" xlink:href="#EnergyConsumer_57101704_3101704" node1="1567844" _Dataid="PD_37000000_177952" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="EnergyConsumer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_37000000_177952" ObjectName="冯田村排灌站(4#)5103612565" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_37000000_178065">
+                <use x="734.2877008" y="-647.5929623" width="3" height="3" transform="scale(0.100000, 0.100000) translate(6608.589307, -5828.336660) rotate(-180.000000, 734.287701, -647.592962)" xlink:href="#EnergyConsumer_57101704_3101704" node1="1567851" _Dataid="PD_37000000_178065" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="EnergyConsumer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_37000000_178065" ObjectName="冯田村排灌站(31#)5103612774" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_37000000_177921">
+                <use x="734.2877008" y="-740.6929623" width="3" height="3" transform="scale(0.100000, 0.100000) translate(6608.589307, -6666.236660) rotate(-180.000000, 734.287701, -740.692962)" xlink:href="#EnergyConsumer_57101704_3101704" node1="1567862" _Dataid="PD_37000000_177921" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="EnergyConsumer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_37000000_177921" ObjectName="顾庄村排灌站(29#)5103612771" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_37000000_177905">
+                <use x="734.2877008" y="-833.7929623" width="3" height="3" transform="scale(0.100000, 0.100000) translate(6608.589307, -7504.136660) rotate(-180.000000, 734.287701, -833.792962)" xlink:href="#EnergyConsumer_57101704_3101704" node1="1567873" _Dataid="PD_37000000_177905" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="EnergyConsumer_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_37000000_177905" ObjectName="顾庄村排灌站(27#)5103612768" PSRType="null" />
+                </metadata>
+            </g>
+        </g>
+        <g id="North_Layer" />
+        <g id="Text_Layer">
+            <g id="1693_502507_0">
+                <text font-size="24" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.8" x="185.1137006" y="-601.1396905" style="text-anchor:middle">纪荀变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502508_0">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="914.0557263" y="-640.5728325" style="text-anchor:middle">戴南镇冯田3#变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502509_0">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="1002.737701" y="-689.2139622" style="text-anchor:middle">戴南镇冯田4#变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502510_0">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="1125.163701" y="-631.6889622" style="text-anchor:middle">戴南镇冯田9#变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502511_0">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="1241.687701" y="-647.614957" style="text-anchor:middle">戴南镇冯田12#</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502511_1">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="1241.687701" y="-632.214957" style="text-anchor:middle">变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502512_0">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="922.0497039" y="-401.7929623" style="text-anchor:middle">戴南镇冯田2#变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502513_0">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="918.5677016" y="-339.088962" style="text-anchor:middle">戴南镇冯田11#</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502513_1">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="918.5677016" y="-323.688962" style="text-anchor:middle">变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502514_0">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="918.5677016" y="-257.964962" style="text-anchor:middle">戴南镇冯田10#</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502514_1">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="918.5677016" y="-242.564962" style="text-anchor:middle">变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502515_0">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="839.0137008" y="-188.3329607" style="text-anchor:middle">戴南镇冯田1#变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502525_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="246.6377008" y="-564.0549614" style="text-anchor:middle">徐唐1B6开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502524_0">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="410.9617008" y="-615.2849628" style="text-anchor:middle">徐唐纪荀K1</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502524_1">
+                <text font-size="14" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4666666667" x="410.9617008" y="-599.8849628" style="text-anchor:middle">开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502516_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="1393.473699" y="-586.7209622" style="text-anchor:middle">冯田村排灌站</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502516_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="1393.473699" y="-572.4209622" style="text-anchor:middle">(6#)5103612576</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502517_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="921.6556991" y="-501.8209622" style="text-anchor:middle">冯田村排灌站</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502517_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="921.6556991" y="-487.5209622" style="text-anchor:middle">(32#)5103612775</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502518_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="953.3997008" y="-434.0069614" style="text-anchor:middle">冯田村排灌站</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502518_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="953.3997008" y="-419.7069614" style="text-anchor:middle">(30#)5103612772</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502519_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="917.7556975" y="-665.7209622" style="text-anchor:middle">冯田村电灌站</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502519_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="917.7556975" y="-651.4209622" style="text-anchor:middle">(3#)5103612561</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502520_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="839.0137008" y="-767.9509609" style="text-anchor:middle">冯田村排灌站</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502520_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="839.0137008" y="-753.6509609" style="text-anchor:middle">(4#)5103612565</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502521_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="651.6457025" y="-648.0209622" style="text-anchor:middle">冯田村排灌站</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502521_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="651.6457025" y="-633.7209622" style="text-anchor:middle">(31#)5103612774</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502522_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="651.6457025" y="-741.1209622" style="text-anchor:middle">顾庄村排灌站</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502522_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="651.6457025" y="-726.8209622" style="text-anchor:middle">(29#)5103612771</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502523_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="734.2877008" y="-872.8509609" style="text-anchor:middle">顾庄村排灌站</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_502523_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="734.2877008" y="-858.5509609" style="text-anchor:middle">(27#)5103612768</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Hot_Layer" />
+    </g>
+</svg>

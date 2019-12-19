@@ -15,9 +15,23 @@
   -ms-flex-align: center;
   align-items: center;
   color: #fff;
+  padding-left: 20px;
+
+  .logo {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: start;
+    -ms-flex-pack: start;
+    justify-content: flex-start;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+  }
 
   h3 {
     font-size: 20px;
+    padding-left: 8px;
     letter-spacing: 3px;
     color: #fff;
     margin: 0;

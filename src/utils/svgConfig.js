@@ -106,9 +106,7 @@ var svgConfig = {
         devices: []
       } //跌落式熔断器     13
     },
-    devices: {
-
-    },
+    devices: {},
   },
   // svg的状态
   svg_statue: SVG_NORMAL,
@@ -318,7 +316,7 @@ function defaultPower () {
   }).map(function (element) {
     return element["id"]
   })
-  powerDeviceColor(svgConfig.select_powers)
+  // powerDeviceColor(svgConfig.select_powers)
   findAllPowersRunPaths(svgConfig.select_powers, svgConfig.power_run_paths, true)
 }
 // 
@@ -358,7 +356,7 @@ function powerDeviceColor (powerDevices) {
       .attr("fill", "rgba(0,0,0,0.01)")
       .attr("stroke-width", "0.5px")
       .attr("stroke-dasharray", svgConfig.select_powers.indexOf(deviceId) > -1 ? "0px" : "0.8px")
-      .attr("stroke", "#f00")
+      .attr("stroke", "orange")
   }
 }
 //设置联络开关的颜色
@@ -416,23 +414,21 @@ function stopSelectPower () {
 function outUpdateCutLine (deviceId, statue) {
   var tuyuan = document.getElementById(deviceId)
   var device = svgConfig.configs.devices[deviceId]
-  console.log(device.type.type)
-  /* if (device.type.type == "compositeswitch") {// 负荷开关
+  if (device.type.type == "compositeswitch") {// 负荷开关
     var compositeSwitch_statue = d3.select(tuyuan).select("use").attr("xlink:href").substr(1)
-    if (!statue) {
+    if (statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kCompositeSwitchStatues.off[kCompositeSwitchStatues.on.indexOf(compositeSwitch_statue)])
     } else {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kCompositeSwitchStatues.on[kCompositeSwitchStatues.off.indexOf(compositeSwitch_statue)])
     }
-  } else */
-  if (device.type.type == "loadbreakswitch") {
+  } else if (device.type.type == "loadbreakswitch") {
     var loadbreakswitch_statue = d3.select(tuyuan).select("use").attr("xlink:href").substr(1)
-    if (!statue) {
+    if (statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kLoadBreakSwitchStatues.off[kLoadBreakSwitchStatues.on.indexOf(loadbreakswitch_statue)])
     } else {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kLoadBreakSwitchStatues.on[kLoadBreakSwitchStatues.off.indexOf(loadbreakswitch_statue)])
     }
-  }  /* else if (device.type.type == "fuse") {
+  } else if (device.type.type == "fuse") {
     var fuse_statue = d3.select(tuyuan).select("use").attr("xlink:href").substr(1)
     if (statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kFuseStatues.off[kFuseStatues.on.indexOf(fuse_statue)])
@@ -448,7 +444,7 @@ function outUpdateCutLine (deviceId, statue) {
     }
   } else if (device.type.type == "breaker") {//开关
     var breaker_statue = d3.select(tuyuan).select("use").attr("xlink:href").substr(1)
-    if (!statue) {
+    if (statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kBreakerStatues.off[kBreakerStatues.on.indexOf(breaker_statue)]) //alert("点击了确定");   
     } else {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kBreakerStatues.on[kBreakerStatues.off.indexOf(breaker_statue)])
@@ -461,7 +457,7 @@ function outUpdateCutLine (deviceId, statue) {
       d3.select(tuyuan).select("polyline").attr("userdata", "off") //alert("点击了确定");
       // d3.select(tuyuan).select("polyline").style("stroke", "#aaa"); 
     }
-  } */
+  }
   updateCutLine(deviceId)
   topology()
 }
@@ -533,7 +529,7 @@ function startCutLine (callback) {
           if (kLoadBreakSwitchStatues.off.indexOf(loadbreakswitch_statue) > -1) {
             statue = false
           }
-        }  /* else if (device.type.type == "fuse") {
+        } else if (device.type.type == "fuse") {
           var fuse_statue = d3.select(this).select("use").attr("xlink:href").substr(1)
           if (kFuseStatues.off.indexOf(fuse_statue) > -1) {
             statue = false
@@ -558,7 +554,8 @@ function startCutLine (callback) {
           if (lineSegment_statue == "off") {
             statue = false
           }
-        } */
+        }
+
         // 剪线回调 第一个参数是设备的ID，第二个参数是不是剪线设备，第三个参数是设备的状态:分/合
         callback(deviceId, svgConfig.cut_lines.indexOf(deviceId) > -1, statue, device.objectname, device.type.type)
       })
@@ -1267,7 +1264,6 @@ function expendClickArea (xml) {
 function loadSvg (superNode, lineNodeData, responseResult, callback) {
   var svgUrl = lineNodeData.svgUrl
   var svgUrl1 = svgUrl.replace(/\%/g, "%25").replace(/\#/g, "%23").replace(/\&/g, "%26")//.replace(/\./, '%2E');
-  console.log("svgUrl1:", svgUrl1, svgUrl)
   // svgUrl1 = 'http://192.168.2.105:8082/tdgl/小伊变/10kV千斤线单线图%2Esln.svg'
   // svgUrl1 = "http://localhost:8080/lib/file.svg"
 
@@ -1323,7 +1319,6 @@ function loadSvgInNewEnergy (superNode, lineNodeData, callback, selectYaoCeCallB
   var svgUrl = lineNodeData.svgUrl
   var svgUrl1 = svgUrl.replace(/\%/g, "%25").replace(/\#/g, "%23").replace(/\&/g, "%26")
   //.replace(/\./, '%2E');
-  console.log("svgUrl1:", svgUrl1, svgUrl)
   // d3.xhr(svgUrl1, "image/svg+xml", function(xml) {
   d3.xml(svgUrl1).mimeType("image/svg+xml").get(function (error, xml) {
     d3.select("#svg").remove()

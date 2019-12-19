@@ -4,11 +4,11 @@ import { Menu, Icon } from "antd"
 import "./index.scss"
 const { SubMenu } = Menu
 
-const flatTreeData = function flatTreeData (treeData, nodeKeys = []) {
+const flatTreeData = function flatTreeData(treeData, nodeKeys = []) {
   treeData.forEach(node => {
     nodeKeys.push(node)
-    if (node.CHILDREN && node.CHILDREN.length) {
-      flatTreeData(node.CHILDREN, nodeKeys)
+    if (node.children && node.children.length) {
+      flatTreeData(node.children, nodeKeys)
     }
   })
   return nodeKeys
@@ -22,7 +22,7 @@ class Tree extends PureComponent {
     selectedKeys: []
   }
 
-  // 重置openKeys 
+  // 重置openKeys
   resetOpenKeys = key => {
     let nodeKeys = []
     let { openKeys, mapTreeData } = this.state
@@ -32,10 +32,10 @@ class Tree extends PureComponent {
     // openKeys = openKeys.reverse()
     openKeys.reverse().forEach((item, index) => {
       // mapTreeData是将树形结构全部展开存储在同一个数组当中，以便查找到当期那操作的节点
-      const target = mapTreeData.find(node => node.ID === item)
+      const target = mapTreeData.find(node => node.id === item)
       if (target) {
         // 查找当前展开的节点key是属于那一层节点的子节点
-        const isExist = target.CHILDREN.some(node => node.ID === key)
+        const isExist = target.children.some(node => node.id === key)
         if (isExist) {
           // 一旦找到当前展开节点所属的子节点就不再向上查找，并从当前openkeys的index截取
           nodeKeys = openKeys.slice(index).reverse()
@@ -50,28 +50,28 @@ class Tree extends PureComponent {
   onOpenChange = openKeys => {
     const latestOpenKey = openKeys.find(key => this.state.openKeys.indexOf(key) === -1)
     const subMenuData = this.state.mapTreeData
-    if (subMenuData.every(node => node.ID !== latestOpenKey)) {
+    if (subMenuData.every(node => node.id !== latestOpenKey)) {
       this.setState({ openKeys })
     } else {
       let openNewKeys = []
       openNewKeys = this.resetOpenKeys(latestOpenKey)
       this.setState({
-        openKeys: latestOpenKey.length ? [...openNewKeys] : [],
+        openKeys: latestOpenKey.length ? [...openNewKeys] : []
       })
     }
   }
 
-  componentDidMount () {
-    this.props.history.listen(() => {
-      this.setState({ openKeys: [] })
-    })
-
-    window.addEventListener("hashchange", () => {
-      console.log("hash change")
-    })
+  componentDidMount() {
+    // this.props.history.listen(() => {
+    //   this.setState({ openKeys: [] })
+    // })
+    // window.addEventListener("hashchange", () => {
+    //   console.log("hash change")
+    //   this.setState({ selectedKeys: [] })
+    // })
   }
 
-  static getDerivedStateFromProps (props, state) {
+  static getDerivedStateFromProps(props, state) {
     // Any time the current user changes,
     // Reset any parts of state that are tied to that user.
     // In this simple example, that"s just the email.
@@ -79,7 +79,7 @@ class Tree extends PureComponent {
       const mapTreeData = flatTreeData(props.treeData)
       return {
         // mapTreeData存储的是具有子节点节点，在组件当中表现的是subMenu
-        mapTreeData: mapTreeData.filter(node => (node.CHILDREN && node.CHILDREN.length)),
+        mapTreeData: mapTreeData.filter(node => node.children && node.children.length),
         treeData: props.treeData
       }
     }
@@ -94,26 +94,33 @@ class Tree extends PureComponent {
 
   // 渲染树节点
   renderTree = (treeData, openKeys) => {
-    const { onClick = () => { } } = this.props
+    const { onClick = () => {} } = this.props
     return treeData.map(node => {
-      if (!node.CHILDREN || node.CHILDREN.length === 0) {
-        return (<Menu.Item key={node.ID} onClick={e => onClick(e, node)}>{node.NAME}</Menu.Item>)
+      if (!node.children || node.children.length === 0) {
+        return (
+          <Menu.Item key={node.id} onClick={e => onClick(e, node)}>
+            {node.name}
+          </Menu.Item>
+        )
       } else {
         return (
-          <SubMenu key={node.ID} title={
-            <span>
-              {openKeys.indexOf(node.ID) > -1 ? <Icon type="caret-down" /> : <Icon type="caret-right" />}
-              <span>{node.NAME}</span>
-            </span>
-          }>
-            {this.renderTree(node.CHILDREN, openKeys)}
+          <SubMenu
+            key={node.id}
+            title={
+              <span>
+                {openKeys.indexOf(node.id) > -1 ? <Icon type="caret-down" /> : <Icon type="caret-right" />}
+                <span>{node.name}</span>
+              </span>
+            }
+          >
+            {this.renderTree(node.children, openKeys)}
           </SubMenu>
         )
       }
     })
   }
 
-  render () {
+  render() {
     const { openKeys, treeData, selectedKeys } = this.state
     return (
       <div className="tree">
@@ -128,9 +135,7 @@ class Tree extends PureComponent {
           selectedKeys={selectedKeys}
           className="nav-menu"
         >
-          {
-            treeData && this.renderTree(treeData, openKeys)
-          }
+          {treeData && this.renderTree(treeData, openKeys)}
         </Menu>
       </div>
     )

@@ -5,6 +5,6 @@ export const getSvg = (lineId = "115967692082515772") => {
   return request.get(INTERFACE_SVG, { lineId })
 }
 
-export const confessionAnalysis = (lineId = "", deviceId = "") => {
-  return request.get(CONFESSION_ANALYSIS, { lineId, deviceId })
+export const confessionAnalysis = (lineId = "", deviceIds = "") => {
+  return request.post(CONFESSION_ANALYSIS, { lineId, deviceIds })
 }

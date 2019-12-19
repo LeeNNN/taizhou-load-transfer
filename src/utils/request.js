@@ -35,15 +35,15 @@ const request = (url, method = "GET", data = {}, headers = null) => {
       data,
       headers
     }).then(res => {
-      console.log(url)
       if (url.indexOf(".svg") > -1) {
         return resolve(res)
       }
       if (+res.resultCode === 1) {
         resolve(res.result)
       } else {
-        // message.destroy()
+        message.destroy()
         message.error(res.resultMsg)
+        reject(res)
       }
     })
   })

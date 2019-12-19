@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg width="1393" height="450" viewBox="0 0 1393 450" onload="init(evt)" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cge="http://iec.ch/TC57/2005/SVG-schema#">
+    <style type="text/css">
+        <![CDATA[]]>
+    </style>
+    <script type="text/ecmascript">
+        var transMatrix = [1, 0, 0, 1, 0, 0];
+        function clickChild(evt){window.parent.clickChild(evt);}
+        function init(evt) {
+        if (window.svgDocument == null) {
+        svgDoc = evt.target.ownerDocument;
+        }
+        mapMatrix = svgDoc.getElementById(&quot;map-matrix&quot;);
+        clientWidth = svgDoc.documentElement.clientWidth;
+        clientHeight = svgDoc.documentElement.clientHeight;
+        getlayer(svgDoc);
+        addEvent(mapMatrix);
+        width = mapMatrix.firstElementChild.width.animVal.value;
+        height = mapMatrix.firstElementChild.height.animVal.value;
+        transMatrix[0] = 1;
+        transMatrix[3] = 1;
+        transMatrix[4] = -(width/2)+(clientWidth/2);
+        transMatrix[5] = -(height/2)+(clientHeight/2);
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);
+        zoomIn(clientHeight/height);
+        }
+        function addEvent(mapMatrix) {
+        if(document.addEventListener){
+        mapMatrix.addEventListener(&apos;DOMMouseScroll&apos;,mousewheel,false);}
+        mapMatrix.setAttribute(&quot;onmousewheel&quot;, &quot;mousewheel(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmouseup&quot;, &quot;mouseup(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousedown&quot;, &quot;mousedown(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousemove&quot;,&quot;mousemove(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousemout&quot;, &quot;mousemout(evt)&quot;);
+        }
+        function mousewheel(evt) {
+        if (evt.wheelDelta) {
+        console.log(evt.wheelDelta);
+        if (evt.wheelDelta == 120) {
+        zoomOut(1.25);
+        }else if(evt.wheelDelta == 180){
+        zoomOut(1.25);
+        } else {
+        zoomIn(0.8);
+        }
+        } else if (evt.detail) {
+        if (evt.detail == -3) {
+        zoomOut(1.25);
+        } else {
+        zoomIn(0.8);}}}
+        var downx = 0;var downy = 0;var downclick = 0;var movex = transMatrix[4];var movey = transMatrix[5];
+        function mouseup(evt) {
+        var oEvent = evt || event;
+        var x = (oEvent.clientX - downx);
+        var y = (oEvent.clientY - downy);
+        movex += x;
+        movey += y;
+        downclick = 0;downx = 0;downy = 0;}
+        function mousemout(evt) {
+        downclick = 0;downx = 0;downy = 0;}
+        function mousedown(evt) {
+        var oEvent = evt || event;
+        downclick = 1;
+        downx = oEvent.clientX;
+        downy = oEvent.clientY;}
+        function mousemove(evt) {
+        if (downclick == 1) {
+        var oEvent = evt || event;
+        var x = (oEvent.clientX - downx);
+        var y = (oEvent.clientY - downy);
+        transMatrix[4] = x + movex;
+        transMatrix[5] = y + movey;
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) +&quot;)&quot;;
+        mapMatrix.setAttributeNS(null,&quot;transform&quot;, newMatrix);}}
+        function getlayer(SvgMainMapDoc) {
+        var node = SvgMainMapDoc.documentElement;
+        findnode(node)}
+        function findnode(node) {
+        for (var i = 0; i &lt; node.childNodes.length; i++) {
+        if (node.childNodes.item(i).nodeType != 3 &amp;&amp; node.childNodes.item(i).nodeType != 4) {
+        var child = node.childNodes.item(i);
+        if (child.getAttribute(&quot;id&quot;) &amp;&amp; child.getAttribute(&quot;objid&quot;) != &quot;&quot; &amp;&amp; child.getAttribute(&quot;objid&quot;) != null) {
+        /*child.setAttribute(&quot;onclick&quot;, &quot;click(this)&quot;); */}
+        if (child.childNodes) {
+        findnode(child);
+        } else {
+        break;
+        }}}}
+        function click(evt) {
+        /*alert(evt.getAttribute(&quot;objid&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objtype&quot;)+&quot;_&quot;+evt.getAttribute(&quot;name&quot;)); */}
+        function move(evt){
+        var id = evt.getAttribute(&quot;objtype&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objid&quot;)
+        var node = svgDoc.documentElement;
+        opacity(node,&quot;1&quot;,id);}
+        function out(evt){
+        var id = evt.getAttribute(&quot;objtype&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objid&quot;)
+        var node = svgDoc.documentElement;
+        opacity(node,&quot;0&quot;,id); }
+        function opacity(node,value,id){
+        for (var i = 0; i &lt; node.childNodes.length; i++) {
+        if (node.childNodes.item(i).nodeType != 3 &amp;&amp; node.childNodes.item(i).nodeType != 4) {
+        var child = node.childNodes.item(i);
+        if (child.getAttribute(&quot;opacity&quot;) &amp;&amp; child.getAttribute(&quot;geoLabel&quot;) != null &amp;&amp;child.getAttribute(&quot;geoLabel&quot;) == id ) {
+        child.setAttribute(&quot;opacity&quot;, value);}
+        if (child.childNodes) {
+        opacity(child,value,id);
+        } else {
+        break;}}}}
+        function pan(dx, dy) {
+        transMatrix[4] += dx;
+        transMatrix[5] += dy;
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos;&apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+        function zoomIn(scale) {
+        console.log(scale);
+        if(transMatrix[0] &lt; 0.02 )
+        return;
+        for (var i = 0; i &lt; transMatrix.length; i++) {
+        transMatrix[i] *= scale;}
+        transMatrix[4] += (1 - scale) * clientWidth / 2;
+        transMatrix[5] += (1 - scale) * clientHeight / 2;
+        movex = transMatrix[4];
+        movey = transMatrix[5];
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+        function zoomOut(scale) {
+        console.log(scale);
+        if(transMatrix[0]&gt;10 ) 
+        return;
+        for (var i = 0; i &lt; transMatrix.length; i++) {
+        transMatrix[i] *= scale;}
+        transMatrix[4] += (1 - scale) * clientWidth / 2;
+        transMatrix[5] += (1 - scale) * clientHeight / 2;
+        movex = transMatrix[4];
+        movey = transMatrix[5];
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+    </script>
+    <defs>
+        <symbol id="Disconnector_11300000_206001@1" viewBox="0.0000 0.0000 2.0000 8.0000">
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="0.000000, 3.000000 2.000000, 3.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="0.000000, 3.000000 1.000000, 5.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 5.000000 1.000000, 8.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 3.000000 1.000000, 0.000000" />
+        </symbol>
+        <symbol id="Disconnector_11300000_206001@0" viewBox="0.0000 0.0000 2.9883 8.0000">
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.09961133333" fill="none" points="0.000000, 3.097210 1.494140, 4.999990" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.09961133333" fill="none" points="0.494170, 3.000000 2.494170, 3.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.09961133333" fill="none" points="0.494200, 3.000010 2.494200, 3.000010 2.494340, 2.995590" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.09961133333" fill="none" points="1.494170, 5.000000 1.494170, 8.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.09961133333" fill="none" points="1.494170, 3.000000 1.494170, 0.000000" />
+        </symbol>
+        <symbol id="Breaker_DMS_CXKG_@1" viewBox="0.0000 0.0000 2.0000 7.5086">
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="rgb(255, 0, 0)" points="0.000000, 1.254270 0.000000, 6.254290 2.000000, 6.254290 2.000000, 1.254270 0.000000, 1.254270" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 2.502853 1.000000, 0.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 5.005707 1.000000, 7.508560" />
+        </symbol>
+        <symbol id="Breaker_DMS_CXKG_@0" viewBox="0.0000 0.0000 2.1196 7.5000">
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 1.212060 1.059810, 0.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="0.000000, 1.225650 0.000000, 6.262610 2.082620, 6.262610 2.082620, 1.225650 0.000000, 1.225650" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 6.258430 1.059810, 7.500030" />
+        </symbol>
+        <symbol id="Breaker_11100000_2040010@1" viewBox="0.0000 0.0000 2.0000 7.5086">
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="rgb(255, 0, 0)" points="0.000000, 1.254270 0.000000, 6.254290 2.000000, 6.254290 2.000000, 1.254270 0.000000, 1.254270" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 2.502853 1.000000, 0.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 5.005707 1.000000, 7.508560" />
+        </symbol>
+        <symbol id="Breaker_11100000_2040010@0" viewBox="0.0000 0.0000 2.1196 7.5000">
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 1.212060 1.059810, 0.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="0.000000, 1.225650 0.000000, 6.262610 2.082620, 6.262610 2.082620, 1.225650 0.000000, 1.225650" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 6.258430 1.059810, 7.500030" />
+        </symbol>
+    </defs>
+    <g id="map-matrix" transform="matrix(1 0 0 1 0 0)">
+        <g id="bglayer">
+            <rect width="1393" x="0.0" height="450" y="0.0" style="fill:#fff;" />
+        </g>
+        <g id="Substation_Layer">
+            <g id="">
+                <polygon stroke="rgb(255, 0, 0)" stroke-width="3" fill="none" points="0.000000, -132.187900 133.997600, -132.187900 133.997600, -87.812100 0.000000, -87.812100 0.000000, -132.187900" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectName="纪荀变" PSRType="30000000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="ACLineSegment_Layer">
+            <g id="PD_20100000_1982222">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="295.622800, -110.000000 355.622800, -110.000000" node1="989697" node2="989698" _Dataid="PD_20100000_1982222" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_235835" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_1982222" ObjectName="站外-电缆终端头1826284-站外-电缆终端头1826285" GlobeID="SBID0000006804887CFFA44B959BAF9E475BB635D4" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29429274">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="405.622800, -110.000000 465.622800, -110.000000" node1="989943" node2="989944" _Dataid="PD_10100000_29429274" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_27346785" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36544504" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29429274" ObjectName="茅沈线020-茅沈线019" GlobeID="12000007027015" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_27346785">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="465.622800, -110.000000 543.072800, -110.000000" node1="989944" node2="989951" _Dataid="PD_10100000_27346785" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_29429274" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_36544504" />
+                    <cge:GLink_Ref ObjectID="PD_11300000_240275" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_27346785" ObjectName="茅沈线071-茅沈线072" GlobeID="12000007230508" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_36544504">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="465.622800, -110.000000 465.622800, -50.000000" node1="989944" node2="989952" _Dataid="PD_10100000_36544504" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_27346785" />
+                    <cge:GLink_Ref ObjectID="PD_10100000_29429274" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_36544504" ObjectName="茅沈线071-西冯4#变支线01" GlobeID="SBID00000062D370602FEE4CFE93C93768D2C224C0" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_30152833">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="633.072800, -110.000000 715.718800, -110.000000" node1="989956" node2="989957" _Dataid="PD_10100000_30152833" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_30152833" ObjectName="茅沈线087-西冯1#变支线01" GlobeID="14001165924011" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_29477299">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="958.178800, -110.000000 1040.824800, -110.000000" node1="989960" node2="989961" _Dataid="PD_10100000_29477299" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_29477299" ObjectName="朱北排支线08-朱北排支线09" GlobeID="14001115410187" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="PD_10100000_27660141">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="765.718800, -110.000000 868.178800, -110.000000" node1="989962" node2="989949" _Dataid="PD_10100000_27660141" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_11300000_286435" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_10100000_27660141" ObjectName="二水厂变支线03-二水厂变支线04" GlobeID="14000265542340" PSRType="10100000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="BusbarSection_Layer">
+            <g id="">
+                <polyline stroke="rgb(255, 0, 0)" stroke-width="2.5" fill="none" points="133.997600, -121.093950 133.997600, -98.906050" node1="989694" node2="0" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_235834" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectName="泰州.纪荀变/10kV.10kVI段母线" PSRType="31100000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="ConnLine_Layer">
+            <g id="PD_14000000_235834">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="133.997600, -110.000000 185.622400, -110.000000" node1="989694" node2="989695" _Dataid="PD_14000000_235834" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_235834" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_235834" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_235835">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="235.622400, -110.000000 295.622800, -110.000000" node1="989696" node2="989697" _Dataid="PD_14000000_235835" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_235835" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_1982222" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_235835" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Disconnector_Layer">
+            <g id="PD_11300000_286435">
+                <use x="888.1788" y="-110" width="2" height="8" transform="scale(40.000000, 40.000000) translate(-865.099330, 110.750000) rotate(540.000000, 888.178800, -110.000000)" xlink:href="#Disconnector_11300000_206001@1" node1="989949" node2="989950" _Dataid="PD_11300000_286435" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_27660141" />
+                    <cge:Layer_Ref ObjectName="Disconnector_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11300000_286435" ObjectName="朱北Z3刀闸" GlobeID="f9bdd88156ff80808157e35b1c0157f9bd5bb254a1" PSRType="11300000" />
+                </metadata>
+            </g>
+            <g id="PD_11300000_240275">
+                <use x="563.0728" y="-110" width="2" height="8" transform="scale(40.000000, 40.000000) translate(-548.120980, 110.750000) rotate(540.000000, 563.072800, -110.000000)" xlink:href="#Disconnector_11300000_206001@1" node1="989951" node2="989953" _Dataid="PD_11300000_240275" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_10100000_27346785" />
+                    <cge:Layer_Ref ObjectName="Disconnector_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11300000_240275" ObjectName="茅沈牧场Z21刀闸" GlobeID="a4936c3889ff808081559208df0155a49332a056b1" PSRType="11300000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Breaker_Layer">
+            <g id="">
+                <use x="210.6224" y="-110" width="2.11962" height="7.50003" transform="scale(49.999800, 49.999800) translate(-205.491433, 111.050017) rotate(540.000000, 210.622400, -110.000000)" xlink:href="#Breaker_DMS_CXKG_@0" node1="989695" node2="989696" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_235834" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_235835" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectName="泰州.纪荀变/10kV.茅沈1A2开关" PSRType="30500000" />
+                </metadata>
+            </g>
+            <g id="">
+                <use x="740.7188" y="-110" width="2" height="7.508559758" transform="scale(19.244703, 19.244703) translate(-701.575330, 106.739362) rotate(540.000000, 740.718800, -110.000000)" xlink:href="#Breaker_11100000_2040010@1" node1="989939" node2="989940" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectName="茅沈朱东Z4开关" PSRType="11100000" />
+                </metadata>
+            </g>
+            <g id="PD_11100000_277174">
+                <use x="380.6228" y="-110" width="2.11962" height="7.50003" transform="scale(19.266590, 19.266590) translate(-360.174119, 106.743076) rotate(540.000000, 380.622800, -110.000000)" xlink:href="#Breaker_11100000_2040010@0" node1="989941" node2="989942" _Dataid="PD_11100000_277174" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11100000_277174" ObjectName="茅沈东庄K1开关" GlobeID="12000007229281" PSRType="11100000" />
+                </metadata>
+            </g>
+            <g id="PD_11100000_379858">
+                <use x="465.6228" y="-25" width="2" height="7.508559758" transform="scale(19.244703, 19.244703) translate(-440.773965, 26.156162) rotate(270.000000, 465.622800, -25.000000)" xlink:href="#Breaker_11100000_2040010@1" node1="989945" node2="989946" _Dataid="PD_11100000_379858" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11100000_379858" ObjectName="茅沈加油站Z5开关" GlobeID="9fceeed2318a06deec5f57ef8a015f9fcd578424cf" PSRType="11100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <use x="1065.8248" y="-110" width="2" height="7.508559758" transform="scale(19.244703, 19.244703) translate(-1009.788058, 106.739362) rotate(540.000000, 1065.824800, -110.000000)" xlink:href="#Breaker_11100000_2040010@1" node1="989947" node2="989948" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectName="茅沈薛家Z6开关" PSRType="11100000" />
+                </metadata>
+            </g>
+            <g id="PD_11100000_300743">
+                <use x="608.0728" y="-110" width="2" height="7.508559758" transform="scale(19.244703, 19.244703) translate(-575.821928, 106.739362) rotate(540.000000, 608.072800, -110.000000)" xlink:href="#Breaker_11100000_2040010@1" node1="989954" node2="989955" _Dataid="PD_11100000_300743" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11100000_300743" ObjectName="茅沈牧场Z2开关" GlobeID="14000571236391" PSRType="11100000" />
+                </metadata>
+            </g>
+            <g id="PD_11100000_328171">
+                <use x="933.1788" y="-110" width="2" height="7.508559758" transform="scale(19.244703, 19.244703) translate(-884.034656, 106.739362) rotate(540.000000, 933.178800, -110.000000)" xlink:href="#Breaker_11100000_2040010@1" node1="989958" node2="989959" _Dataid="PD_11100000_328171" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_11100000_328171" ObjectName="茅沈朱北Z3开关" GlobeID="14001115403264" PSRType="11100000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Text_Layer">
+            <g id="1693_273068_0">
+                <text font-size="24" font-family="SimSun" stroke="rgb(255, 0, 0)" stroke-width="0.8" x="61.28479977" y="-103" style="text-anchor:middle">纪荀变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273069_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="889.1788" y="-121.6660004" style="text-anchor:middle">Z3</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273070_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="560.5728" y="-121.6660004" style="text-anchor:middle">Z21</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273077_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="210.6224" y="-121.2859993" style="text-anchor:middle">茅沈1A2开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273071_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="740.7188" y="-135" style="text-anchor:middle">茅沈朱东Z4</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273071_1">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="740.7188" y="-121.8" style="text-anchor:middle">开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273072_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="380.6228" y="-135" style="text-anchor:middle">茅沈东庄K1</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273072_1">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="380.6228" y="-121.8" style="text-anchor:middle">开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273073_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="426.9567996" y="-24.66600037" style="text-anchor:middle">茅沈加油</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273073_1">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="426.9567996" y="-11.46600037" style="text-anchor:middle">站Z5开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273074_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="1065.8248" y="-135" style="text-anchor:middle">茅沈薛家Z6</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273074_1">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="1065.8248" y="-121.8" style="text-anchor:middle">开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273075_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="624.7388004" y="-135" style="text-anchor:middle">茅沈牧场Z2</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273075_1">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="624.7388004" y="-121.8" style="text-anchor:middle">开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273076_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="949.8448004" y="-135" style="text-anchor:middle">茅沈朱北Z3</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_273076_1">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="949.8448004" y="-121.8" style="text-anchor:middle">开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Hot_Layer" />
+    </g>
+</svg>

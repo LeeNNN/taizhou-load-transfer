@@ -1,0 +1,19 @@
+.legend {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 12px 20px;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+}
+
+.legend-desc {
+  padding-left: 8px;
+  line-height: 48px;
+}

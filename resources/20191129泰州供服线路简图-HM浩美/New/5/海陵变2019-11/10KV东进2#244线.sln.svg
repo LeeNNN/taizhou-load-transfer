@@ -1,0 +1,2618 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg width="2555" height="1224" viewBox="0 0 2555 1224" onload="init(evt)" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cge="http://iec.ch/TC57/2005/SVG-schema#">
+    <style type="text/css">
+        <![CDATA[]]>
+    </style>
+    <script type="text/ecmascript">
+        var transMatrix = [1, 0, 0, 1, 0, 0];
+        function clickChild(evt){window.parent.clickChild(evt);}
+        function init(evt) {
+        if (window.svgDocument == null) {
+        svgDoc = evt.target.ownerDocument;
+        }
+        mapMatrix = svgDoc.getElementById(&quot;map-matrix&quot;);
+        clientWidth = svgDoc.documentElement.clientWidth;
+        clientHeight = svgDoc.documentElement.clientHeight;
+        getlayer(svgDoc);
+        addEvent(mapMatrix);
+        width = mapMatrix.firstElementChild.width.animVal.value;
+        height = mapMatrix.firstElementChild.height.animVal.value;
+        transMatrix[0] = 1;
+        transMatrix[3] = 1;
+        transMatrix[4] = -(width/2)+(clientWidth/2);
+        transMatrix[5] = -(height/2)+(clientHeight/2);
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);
+        zoomIn(clientHeight/height);
+        }
+        function addEvent(mapMatrix) {
+        if(document.addEventListener){
+        mapMatrix.addEventListener(&apos;DOMMouseScroll&apos;,mousewheel,false);}
+        mapMatrix.setAttribute(&quot;onmousewheel&quot;, &quot;mousewheel(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmouseup&quot;, &quot;mouseup(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousedown&quot;, &quot;mousedown(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousemove&quot;,&quot;mousemove(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousemout&quot;, &quot;mousemout(evt)&quot;);
+        }
+        function mousewheel(evt) {
+        if (evt.wheelDelta) {
+        console.log(evt.wheelDelta);
+        if (evt.wheelDelta == 120) {
+        zoomOut(1.25);
+        }else if(evt.wheelDelta == 180){
+        zoomOut(1.25);
+        } else {
+        zoomIn(0.8);
+        }
+        } else if (evt.detail) {
+        if (evt.detail == -3) {
+        zoomOut(1.25);
+        } else {
+        zoomIn(0.8);}}}
+        var downx = 0;var downy = 0;var downclick = 0;var movex = transMatrix[4];var movey = transMatrix[5];
+        function mouseup(evt) {
+        var oEvent = evt || event;
+        var x = (oEvent.clientX - downx);
+        var y = (oEvent.clientY - downy);
+        movex += x;
+        movey += y;
+        downclick = 0;downx = 0;downy = 0;}
+        function mousemout(evt) {
+        downclick = 0;downx = 0;downy = 0;}
+        function mousedown(evt) {
+        var oEvent = evt || event;
+        downclick = 1;
+        downx = oEvent.clientX;
+        downy = oEvent.clientY;}
+        function mousemove(evt) {
+        if (downclick == 1) {
+        var oEvent = evt || event;
+        var x = (oEvent.clientX - downx);
+        var y = (oEvent.clientY - downy);
+        transMatrix[4] = x + movex;
+        transMatrix[5] = y + movey;
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) +&quot;)&quot;;
+        mapMatrix.setAttributeNS(null,&quot;transform&quot;, newMatrix);}}
+        function getlayer(SvgMainMapDoc) {
+        var node = SvgMainMapDoc.documentElement;
+        findnode(node)}
+        function findnode(node) {
+        for (var i = 0; i &lt; node.childNodes.length; i++) {
+        if (node.childNodes.item(i).nodeType != 3 &amp;&amp; node.childNodes.item(i).nodeType != 4) {
+        var child = node.childNodes.item(i);
+        if (child.getAttribute(&quot;id&quot;) &amp;&amp; child.getAttribute(&quot;objid&quot;) != &quot;&quot; &amp;&amp; child.getAttribute(&quot;objid&quot;) != null) {
+        /*child.setAttribute(&quot;onclick&quot;, &quot;click(this)&quot;); */}
+        if (child.childNodes) {
+        findnode(child);
+        } else {
+        break;
+        }}}}
+        function click(evt) {
+        /*alert(evt.getAttribute(&quot;objid&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objtype&quot;)+&quot;_&quot;+evt.getAttribute(&quot;name&quot;)); */}
+        function move(evt){
+        var id = evt.getAttribute(&quot;objtype&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objid&quot;)
+        var node = svgDoc.documentElement;
+        opacity(node,&quot;1&quot;,id);}
+        function out(evt){
+        var id = evt.getAttribute(&quot;objtype&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objid&quot;)
+        var node = svgDoc.documentElement;
+        opacity(node,&quot;0&quot;,id); }
+        function opacity(node,value,id){
+        for (var i = 0; i &lt; node.childNodes.length; i++) {
+        if (node.childNodes.item(i).nodeType != 3 &amp;&amp; node.childNodes.item(i).nodeType != 4) {
+        var child = node.childNodes.item(i);
+        if (child.getAttribute(&quot;opacity&quot;) &amp;&amp; child.getAttribute(&quot;geoLabel&quot;) != null &amp;&amp;child.getAttribute(&quot;geoLabel&quot;) == id ) {
+        child.setAttribute(&quot;opacity&quot;, value);}
+        if (child.childNodes) {
+        opacity(child,value,id);
+        } else {
+        break;}}}}
+        function pan(dx, dy) {
+        transMatrix[4] += dx;
+        transMatrix[5] += dy;
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos;&apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+        function zoomIn(scale) {
+        console.log(scale);
+        if(transMatrix[0] &lt; 0.02 )
+        return;
+        for (var i = 0; i &lt; transMatrix.length; i++) {
+        transMatrix[i] *= scale;}
+        transMatrix[4] += (1 - scale) * clientWidth / 2;
+        transMatrix[5] += (1 - scale) * clientHeight / 2;
+        movex = transMatrix[4];
+        movey = transMatrix[5];
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+        function zoomOut(scale) {
+        console.log(scale);
+        if(transMatrix[0]&gt;10 ) 
+        return;
+        for (var i = 0; i &lt; transMatrix.length; i++) {
+        transMatrix[i] *= scale;}
+        transMatrix[4] += (1 - scale) * clientWidth / 2;
+        transMatrix[5] += (1 - scale) * clientHeight / 2;
+        movex = transMatrix[4];
+        movey = transMatrix[5];
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+    </script>
+    <defs>
+        <symbol id="Disconnector_11300000_206001@1" viewBox="0.0000 0.0000 2.0000 8.0000">
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="0.000000, 3.000000 2.000000, 3.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="0.000000, 3.000000 1.000000, 5.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 5.000000 1.000000, 8.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 3.000000 1.000000, 0.000000" />
+        </symbol>
+        <symbol id="Disconnector_11300000_206001@0" viewBox="0.0000 0.0000 2.9883 8.0000">
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.09961133333" fill="none" points="0.000000, 3.097210 1.494140, 4.999990" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.09961133333" fill="none" points="0.494170, 3.000000 2.494170, 3.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.09961133333" fill="none" points="0.494200, 3.000010 2.494200, 3.000010 2.494340, 2.995590" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.09961133333" fill="none" points="1.494170, 5.000000 1.494170, 8.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.09961133333" fill="none" points="1.494170, 3.000000 1.494170, 0.000000" />
+        </symbol>
+        <symbol id="Breaker_DMS_CXKG_@1" viewBox="0.0000 0.0000 2.0000 7.5086">
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="rgb(255, 0, 0)" points="0.000000, 1.254270 0.000000, 6.254290 2.000000, 6.254290 2.000000, 1.254270 0.000000, 1.254270" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 2.502853 1.000000, 0.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 5.005707 1.000000, 7.508560" />
+        </symbol>
+        <symbol id="Breaker_DMS_CXKG_@0" viewBox="0.0000 0.0000 2.1196 7.5000">
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 1.212060 1.059810, 0.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="0.000000, 1.225650 0.000000, 6.262610 2.082620, 6.262610 2.082620, 1.225650 0.000000, 1.225650" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 6.258430 1.059810, 7.500030" />
+        </symbol>
+        <symbol id="LoadBreakSwitch_BREAKER_@1" viewBox="0.0000 0.0000 2.0000 7.5086">
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="rgb(255, 0, 0)" points="0.000000, 1.254270 0.000000, 6.254290 2.000000, 6.254290 2.000000, 1.254270 0.000000, 1.254270" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 2.502853 1.000000, 0.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 5.005707 1.000000, 7.508560" />
+        </symbol>
+        <symbol id="LoadBreakSwitch_BREAKER_@0" viewBox="0.0000 0.0000 2.1196 7.5000">
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 1.212060 1.059810, 0.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="0.000000, 1.225650 0.000000, 6.262610 2.082620, 6.262610 2.082620, 1.225650 0.000000, 1.225650" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 6.258430 1.059810, 7.500030" />
+        </symbol>
+        <symbol id="Breaker_BREAKER_@1" viewBox="0.0000 0.0000 2.0000 7.5086">
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="rgb(255, 0, 0)" points="0.000000, 1.254270 0.000000, 6.254290 2.000000, 6.254290 2.000000, 1.254270 0.000000, 1.254270" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 2.502853 1.000000, 0.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 5.005707 1.000000, 7.508560" />
+        </symbol>
+        <symbol id="Breaker_BREAKER_@0" viewBox="0.0000 0.0000 2.1196 7.5000">
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 1.212060 1.059810, 0.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="0.000000, 1.225650 0.000000, 6.262610 2.082620, 6.262610 2.082620, 1.225650 0.000000, 1.225650" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 6.258430 1.059810, 7.500030" />
+        </symbol>
+        <symbol id="Breaker_11100000_2040010@1" viewBox="0.0000 0.0000 2.0000 7.5086">
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="rgb(255, 0, 0)" points="0.000000, 1.254270 0.000000, 6.254290 2.000000, 6.254290 2.000000, 1.254270 0.000000, 1.254270" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 2.502853 1.000000, 0.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 5.005707 1.000000, 7.508560" />
+        </symbol>
+        <symbol id="Breaker_11100000_2040010@0" viewBox="0.0000 0.0000 2.1196 7.5000">
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 1.212060 1.059810, 0.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="0.000000, 1.225650 0.000000, 6.262610 2.082620, 6.262610 2.082620, 1.225650 0.000000, 1.225650" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 6.258430 1.059810, 7.500030" />
+        </symbol>
+    </defs>
+    <g id="map-matrix" transform="matrix(1 0 0 1 0 0)">
+        <g id="bglayer">
+            <rect width="2555" x="0.0" height="1224" y="0.0" style="fill:#fff;" />
+        </g>
+        <g id="Substation_Layer">
+            <g id="">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="3" fill="none" points="364.694298, -570.214886 617.753600, -570.214886 617.753600, -708.214886 364.694298, -708.214886 364.694298, -570.214886" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectName="宏基4#环网柜" PSRType="32400000" />
+                </metadata>
+            </g>
+            <g id="PD_32400000_2715696">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="3" fill="none" points="511.386298, -108.786286 700.445600, -108.786286 700.445600, -246.786286 511.386298, -246.786286 511.386298, -108.786286" node1="0" node2="0" _Dataid="PD_32400000_2715696" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_32400000_2715696" ObjectName="东进小区环网柜" GlobeID="e20c96700d8a06deec69cafa7a0169e20bcb9370b3" PSRType="32400000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polygon stroke="rgb(255, 0, 0)" stroke-width="3" fill="none" points="0.000000, -766.974286 105.271200, -766.974286 105.271200, -702.598286 0.000000, -702.598286 0.000000, -766.974286" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectName="海陵变" PSRType="30000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_25750">
+                <polygon stroke="rgb(16, 195, 192)" stroke-width="5" fill="none" points="561.017028, -82.857144 561.017028, 0.000000 607.517028, 0.000000 607.517028, -82.857144 561.017028, -82.857144" node1="0" node2="0" _Dataid="PD_14000000_25750" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_25750" ObjectName="东区线22#杆至东进小区环网柜分支箱~东进小区标签框" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_25751">
+                <polygon stroke="rgb(16, 195, 192)" stroke-width="5" fill="none" points="625.017028, -82.857144 625.017028, 0.000000 671.517028, 0.000000 671.517028, -82.857144 625.017028, -82.857144" node1="0" node2="0" _Dataid="PD_14000000_25751" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_25751" ObjectName="东进小区~东进1#配电房标签框" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_25752">
+                <polygon stroke="rgb(16, 195, 192)" stroke-width="5" fill="none" points="2179.007028, -544.286344 2179.007028, -461.429200 2225.507028, -461.429200 2225.507028, -544.286344 2179.007028, -544.286344" node1="0" node2="0" _Dataid="PD_14000000_25752" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_25752" ObjectName="启鼎2#366开关~启鼎花园标签框" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="3" fill="none" points="364.694298, -386.644286 553.753600, -386.644286 553.753600, -503.644286 364.694298, -503.644286 364.694298, -386.644286" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectName="宏基1#配电房" PSRType="30000005" />
+                </metadata>
+            </g>
+            <g id="PD_30000005_2773980">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="3" fill="none" points="561.754298, -365.644286 686.813600, -365.644286 686.813600, -503.644286 561.754298, -503.644286 561.754298, -365.644286" node1="0" node2="0" _Dataid="PD_30000005_2773980" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30000005_2773980" ObjectName="宏基2#配电房" GlobeID="12000007272900" PSRType="30000005" />
+                </metadata>
+            </g>
+            <g id="">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="3" fill="none" points="1250.254298, -579.786286 1439.313600, -579.786286 1439.313600, -696.786286 1250.254298, -696.786286 1250.254298, -579.786286" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectName="东进5#配电房" PSRType="30000005" />
+                </metadata>
+            </g>
+            <g id="">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="3" fill="none" points="1483.314298, -579.786286 1672.373600, -579.786286 1672.373600, -696.786286 1483.314298, -696.786286 1483.314298, -579.786286" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectName="东进4#配电房" PSRType="30000005" />
+                </metadata>
+            </g>
+            <g id="PD_30000005_2782928">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="3" fill="none" points="1013.504298, -118.358286 1202.563600, -118.358286 1202.563600, -235.358286 1013.504298, -235.358286 1013.504298, -118.358286" node1="0" node2="0" _Dataid="PD_30000005_2782928" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30000005_2782928" ObjectName="东进6#配电房" GlobeID="12000000483613" PSRType="30000005" />
+                </metadata>
+            </g>
+            <g id="PD_30000005_2772414">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="3" fill="none" points="780.444298, -118.358286 969.503600, -118.358286 969.503600, -235.358286 780.444298, -235.358286 780.444298, -118.358286" node1="0" node2="0" _Dataid="PD_30000005_2772414" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30000005_2772414" ObjectName="东进3#配电房" GlobeID="12000000484160" PSRType="30000005" />
+                </metadata>
+            </g>
+            <g id="PD_30000005_2772416">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="3" fill="none" points="1595.564298, -97.358286 1720.623600, -97.358286 1720.623600, -235.358286 1595.564298, -235.358286 1595.564298, -97.358286" node1="0" node2="0" _Dataid="PD_30000005_2772416" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30000005_2772416" ObjectName="东进2#配电房" GlobeID="12000007416461" PSRType="30000005" />
+                </metadata>
+            </g>
+            <g id="PD_30000005_2783147">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="3" fill="none" points="2065.376298, -570.214886 2254.435600, -570.214886 2254.435600, -708.214886 2065.376298, -708.214886 2065.376298, -570.214886" node1="0" node2="0" _Dataid="PD_30000005_2783147" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30000005_2783147" ObjectName="启鼎花园配电房" GlobeID="12000000472429" PSRType="30000005" />
+                </metadata>
+            </g>
+            <g id="">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="3" fill="none" points="800.254298, -701.714866 925.313600, -701.714866 925.313600, -818.714866 800.254298, -818.714866 800.254298, -701.714866" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectName="东城家园" PSRType="30000005" />
+                </metadata>
+            </g>
+        </g>
+        <g id="ConnLine_Layer">
+            <g id="PD_14000000_55215">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="703.753600, -845.286286 753.753600, -845.286286" node1="1117923" node2="1117922" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55215" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55216">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="953.753600, -734.786286 1003.753600, -734.786286" node1="1117921" node2="1117925" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55216" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55217">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1053.753600, -734.786286 1103.753600, -734.786286" node1="1117926" node2="1117927" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55217" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55218">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1153.753600, -734.786286 1203.753600, -734.786286" node1="1117928" node2="1117929" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55218" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55219">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1499.063600, -273.358286 1449.063600, -273.358286" node1="1117933" node2="1117934" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55219" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55220">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1399.063600, -273.358286 1349.063600, -273.358286" node1="1117935" node2="1117936" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55220" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55221">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1299.063600, -273.358286 1249.063600, -273.358286" node1="1117937" node2="1117938" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55221" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55222">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1768.873600, -734.786286 1818.873600, -734.786286" node1="1117932" node2="1117939" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55222" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55223">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1868.873600, -734.786286 1918.873600, -734.786286" node1="1117940" node2="1117941" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55223" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55224">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1968.873600, -734.786286 2018.873600, -734.786286" node1="1117942" node2="1117943" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55224" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55225">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="503.753600, -845.286286 453.753600, -845.286286" node1="1117944" node2="1117945" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55225" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55226" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55226">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="503.753600, -845.286286 553.753600, -845.286286" node1="1117944" node2="1117947" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55225" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55226" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55227">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="403.753600, -845.286286 353.753600, -845.286286" node1="1117946" node2="1117949" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55227" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55228">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="303.753600, -845.286286 253.753600, -845.286286" node1="1117950" node2="1117951" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55228" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_55229">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="603.753600, -845.286286 653.753600, -845.286286" node1="1117948" node2="1117924" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55229" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectName="null" PSRType="13000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288285">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="105.271200, -734.786286 115.271200, -734.786286" node1="1117828" node2="1117829" _Dataid="PD_14000000_288285" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288285" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288285" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288286">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="155.271200, -734.786286 165.271200, -734.786286" node1="1117830" node2="1117831" _Dataid="PD_14000000_288286" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288286" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288286" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288287">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="439.753600, -638.214886 439.753600, -648.214886" node1="1117832" node2="1117833" _Dataid="PD_14000000_288287" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288287" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288287" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288288">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="439.753600, -688.214886 439.753600, -698.214886" node1="1117834" node2="1117835" _Dataid="PD_14000000_288288" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288288" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288288" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288289">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="567.753600, -638.214886 567.753600, -648.214886" node1="1117832" node2="1117836" _Dataid="PD_14000000_288289" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288289" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288289" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288290">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="567.753600, -688.214886 567.753600, -698.214886" node1="1117837" node2="1117838" _Dataid="PD_14000000_288290" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288290" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288290" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288291">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="503.753600, -638.214886 503.753600, -648.214886" node1="1117832" node2="1117839" _Dataid="PD_14000000_288291" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288291" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288291" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288292">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="503.753600, -688.214886 503.753600, -698.214886" node1="1117840" node2="1117841" _Dataid="PD_14000000_288292" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288292" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288292" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288293">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="439.753600, -638.214886 439.753600, -628.214886" node1="1117832" node2="1117842" _Dataid="PD_14000000_288293" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288293" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288293" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288294">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="439.753600, -588.214886 439.753600, -578.214886" node1="1117843" node2="1117844" _Dataid="PD_14000000_288294" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288294" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288294" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288295">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="439.753600, -433.644286 439.753600, -443.644286" node1="1117845" node2="1117846" _Dataid="PD_14000000_288295" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288295" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288295" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288296">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="439.753600, -483.644286 439.753600, -493.644286" node1="1117847" node2="1117848" _Dataid="PD_14000000_288296" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288296" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288296" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288297">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="503.753600, -433.644286 503.753600, -443.644286" node1="1117845" node2="1117849" _Dataid="PD_14000000_288297" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288297" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288297" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288298">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="503.753600, -483.644286 503.753600, -493.644286" node1="1117850" node2="1117851" _Dataid="PD_14000000_288298" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288298" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288298" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288299">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="636.813600, -433.644286 636.813600, -423.644286" node1="1117852" node2="1117853" _Dataid="PD_14000000_288299" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288299" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2743649@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1341495" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288299" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288300">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="636.813600, -383.644286 636.813600, -373.644286" node1="1117854" node2="1117855" _Dataid="PD_14000000_288300" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288300" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2743649@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288300" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288301">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="636.813600, -433.644286 636.813600, -443.644286" node1="1117852" node2="1117856" _Dataid="PD_14000000_288301" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288301" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2743650@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1341495" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288301" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288302">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="636.813600, -483.644286 636.813600, -493.644286" node1="1117857" node2="1117858" _Dataid="PD_14000000_288302" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288302" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2743650@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288302" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288303">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1325.313600, -626.786286 1325.313600, -636.786286" node1="1117859" node2="1117860" _Dataid="PD_14000000_288303" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288303" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288303" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288304">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1325.313600, -676.786286 1325.313600, -686.786286" node1="1117861" node2="1117862" _Dataid="PD_14000000_288304" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288304" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288304" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288305">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1389.313600, -626.786286 1389.313600, -636.786286" node1="1117859" node2="1117863" _Dataid="PD_14000000_288305" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288305" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288305" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288306">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1389.313600, -676.786286 1389.313600, -686.786286" node1="1117864" node2="1117865" _Dataid="PD_14000000_288306" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288306" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288306" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288307">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1558.373600, -626.786286 1558.373600, -636.786286" node1="1117866" node2="1117867" _Dataid="PD_14000000_288307" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288307" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288307" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288308">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1558.373600, -676.786286 1558.373600, -686.786286" node1="1117868" node2="1117869" _Dataid="PD_14000000_288308" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288308" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288308" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288309">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1622.373600, -626.786286 1622.373600, -636.786286" node1="1117866" node2="1117870" _Dataid="PD_14000000_288309" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288309" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288309" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288310">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1622.373600, -676.786286 1622.373600, -686.786286" node1="1117871" node2="1117872" _Dataid="PD_14000000_288310" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288310" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288310" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288311">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1088.563600, -165.358286 1088.563600, -175.358286" node1="1117873" node2="1117874" _Dataid="PD_14000000_288311" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288311" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@829593@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1341418" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288311" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288312">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1088.563600, -215.358286 1088.563600, -225.358286" node1="1117875" node2="1117876" _Dataid="PD_14000000_288312" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288312" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_1575775" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@829593@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288312" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288313">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1152.563600, -165.358286 1152.563600, -175.358286" node1="1117873" node2="1117877" _Dataid="PD_14000000_288313" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288313" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2743289@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1341418" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288313" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288314">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1152.563600, -215.358286 1152.563600, -225.358286" node1="1117878" node2="1117879" _Dataid="PD_14000000_288314" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288314" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2743289@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288314" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288315">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="919.503600, -165.358286 919.503600, -175.358286" node1="1117880" node2="1117881" _Dataid="PD_14000000_288315" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288315" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823638@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1341419" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288315" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288316">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="919.503600, -215.358286 919.503600, -225.358286" node1="1117882" node2="1117883" _Dataid="PD_14000000_288316" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288316" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_1575775" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823638@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288316" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288317">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="855.503600, -165.358286 855.503600, -175.358286" node1="1117880" node2="1117884" _Dataid="PD_14000000_288317" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288317" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823639@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1341419" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288317" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288318">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="855.503600, -215.358286 855.503600, -225.358286" node1="1117885" node2="1117886" _Dataid="PD_14000000_288318" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288318" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_1830542" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823639@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288318" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288319">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="650.445600, -176.786286 650.445600, -166.786286" node1="1117887" node2="1117888" _Dataid="PD_14000000_288319" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288319" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823800@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1340789" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288319" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288320">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="650.445600, -126.786286 650.445600, -116.786286" node1="1117889" node2="1117890" _Dataid="PD_14000000_288320" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288320" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_2278522" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823800@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288320" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288321">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="586.445600, -176.786286 586.445600, -186.786286" node1="1117887" node2="1117891" _Dataid="PD_14000000_288321" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288321" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823801@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1340789" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288321" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288322">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="586.445600, -226.786286 586.445600, -236.786286" node1="1117892" node2="1117893" _Dataid="PD_14000000_288322" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288322" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_1830542" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823801@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288322" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288323">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="586.445600, -176.786286 586.445600, -166.786286" node1="1117887" node2="1117894" _Dataid="PD_14000000_288323" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288323" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823804@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1340789" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288323" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288324">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="586.445600, -126.786286 586.445600, -116.786286" node1="1117895" node2="1117896" _Dataid="PD_14000000_288324" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288324" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_2183757" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823804@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288324" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288325">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1670.623600, -165.358286 1670.623600, -155.358286" node1="1117897" node2="1117898" _Dataid="PD_14000000_288325" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288325" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@1523366@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1965823" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288325" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288326">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1670.623600, -115.358286 1670.623600, -105.358286" node1="1117899" node2="1117900" _Dataid="PD_14000000_288326" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288326" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@1523366@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288326" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288327">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1670.623600, -165.358286 1670.623600, -175.358286" node1="1117897" node2="1117901" _Dataid="PD_14000000_288327" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288327" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@1523394@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1965823" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288327" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288328">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1670.623600, -215.358286 1670.623600, -225.358286" node1="1117902" node2="1117903" _Dataid="PD_14000000_288328" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288328" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@1523394@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288328" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288329">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="2140.435600, -638.214886 2140.435600, -648.214886" node1="1117904" node2="1117905" _Dataid="PD_14000000_288329" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288329" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2741173@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1344876" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288329" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288330">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="2140.435600, -688.214886 2140.435600, -698.214886" node1="1117906" node2="1117907" _Dataid="PD_14000000_288330" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288330" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2741173@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288330" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288331">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="2140.435600, -638.214886 2140.435600, -628.214886" node1="1117904" node2="1117908" _Dataid="PD_14000000_288331" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288331" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2741174@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1344876" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288331" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288332">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="2140.435600, -588.214886 2140.435600, -578.214886" node1="1117909" node2="1117910" _Dataid="PD_14000000_288332" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288332" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2741174@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288332" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288333">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="2204.435600, -638.214886 2204.435600, -648.214886" node1="1117904" node2="1117911" _Dataid="PD_14000000_288333" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288333" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2741175@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1344876" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288333" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288334">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="2204.435600, -688.214886 2204.435600, -698.214886" node1="1117912" node2="1117913" _Dataid="PD_14000000_288334" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288334" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2741175@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288334" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288335">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="2204.435600, -638.214886 2204.435600, -628.214886" node1="1117904" node2="1117914" _Dataid="PD_14000000_288335" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288335" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@3126746@1" />
+                    <cge:GLink_Ref ObjectID="PD_31100000_1344876" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288335" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288336">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="2204.435600, -588.214886 2204.435600, -578.214886" node1="1117915" node2="1117916" _Dataid="PD_14000000_288336" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288336" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_1821067" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@3126746@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288336" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288337">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="875.313600, -748.714866 875.313600, -758.714866" node1="1117917" node2="1117918" _Dataid="PD_14000000_288337" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288337" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288337" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_288338">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="875.313600, -798.714866 875.313600, -808.714866" node1="1117919" node2="1117920" _Dataid="PD_14000000_288338" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288338" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_@@1" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_288338" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="ACLineSegment_Layer">
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="165.271200, -734.786286 439.753600, -734.786286 439.753600, -698.214886" node1="1117831" node2="1117835" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288286" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288288" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="东进2#线244断路器~宏基4#环网柜" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="439.753600, -578.214886 439.753600, -493.644286" node1="1117844" node2="1117848" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288294" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288296" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="宏基4#环网柜~宏基1#配电房" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="503.753600, -493.644286 503.753600, -541.643486 636.813600, -541.643486 636.813600, -493.644286" node1="1117851" node2="1117858" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288298" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288302" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="宏基1#配电房~宏基2#配电房" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="567.753600, -698.214886 567.753600, -923.503086 953.753600, -923.503086 953.753600, -734.786286" node1="1117838" node2="1117921" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288290" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55216" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="宏基4#环网柜~分支箱" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="753.753600, -845.286286 875.313600, -845.286286 875.313600, -808.714866" node1="1117922" node2="1117920" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288338" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55215" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="东城家园配电房开关~东城家园" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1203.753600, -734.786286 1325.313600, -734.786286 1325.313600, -686.786286" node1="1117929" node2="1117862" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288304" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55218" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="东进441开关~东进5#配电房" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1389.313600, -686.786286 1389.313600, -734.786286 1558.373600, -734.786286 1558.373600, -686.786286" node1="1117865" node2="1117869" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288306" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288308" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="东进5#配电房~分支箱" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1622.373600, -686.786286 1622.373600, -734.786286 1718.873600, -734.786286" node1="1117872" node2="1117930" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288310" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="东进4#配电房~小区架空支01" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1249.063600, -273.358286 1152.563600, -273.358286 1152.563600, -225.358286" node1="1117938" node2="1117879" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288314" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55221" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="东进花园443开关~东进6#配电房" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="PD_20100000_1575775">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1088.563600, -225.358286 1088.563600, -273.358286 919.503600, -273.358286 919.503600, -225.358286" node1="1117876" node2="1117883" _Dataid="PD_20100000_1575775" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288312" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288316" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_1575775" ObjectName="东进3#配电房~东进6#配电房" GlobeID="14000884300965" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="PD_20100000_1830542">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="855.503600, -225.358286 855.503600, -273.358286 586.445600, -273.358286 586.445600, -236.786286" node1="1117886" node2="1117893" _Dataid="PD_20100000_1830542" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288318" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288322" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_1830542" ObjectName="东进小区~东进3#配电房" GlobeID="14000874800468" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="2018.873600, -734.786286 2140.435600, -734.786286 2140.435600, -698.214886" node1="1117943" node2="1117907" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288330" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55224" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="启鼎花园~236玻纤线启鼎支02" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="503.753600, -698.214886 503.753600, -845.286286" node1="1117841" node2="1117944" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288292" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55225" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55226" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="宏基4#环网柜~245东进2线东城家园支01" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="PD_20100000_2183757">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="586.445600, -116.786286 586.445600, -85.714286" node1="1117896" node2="1117952" _Dataid="PD_20100000_2183757" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288324" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_2183757" ObjectName="东区线22#杆至东进小区环网柜分支箱~东进小区" GlobeID="SBID00000067A589DAC2BB4C98A76BF995DC2A530D" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="PD_20100000_2278522">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="650.445600, -116.786286 650.445600, -85.714286" node1="1117890" node2="1117953" _Dataid="PD_20100000_2278522" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288320" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_2278522" ObjectName="东进小区~东进1#配电房" GlobeID="SBID00000079B8855CFBD24784AAA7BBA498E294D9" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="PD_20100000_1821067">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="2204.435600, -578.214886 2204.435600, -547.143486" node1="1117916" node2="1117954" _Dataid="PD_20100000_1821067" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288336" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_1821067" ObjectName="启鼎2#366开关~启鼎花园" GlobeID="12000001007187" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1718.873600, -734.786286 1715.623600, -734.786286 1715.623600, -292.513988 1549.063600, -294.785634 1549.063600, -273.358286" node1="1117930" node2="1117931" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="GXD101244小区架空支07~小区架空支08" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1718.873600, -734.786286 1768.873600, -734.786286" node1="1117930" node2="1117932" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55222" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="GXD101244小区架空支07~244东进2号线启鼎支01" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1549.063600, -273.358286 1499.063600, -273.358286" node1="1117931" node2="1117933" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55219" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="GXD101244小区架空支08~小区架空支09" PSRType="10100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(168, 0, 0)" stroke-width="5" fill="none" points="1549.063600, -273.358286 1670.623600, -273.358286 1670.623600, -225.358286" node1="1117931" node2="1117903" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288328" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectName="GXD101244小区架空支08~2#配电房支01" PSRType="10100000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="BusbarSection_Layer">
+            <g id="">
+                <polyline stroke="rgb(170, 0, 0)" stroke-width="5" fill="none" points="407.753600, -638.214886 599.753600, -638.214886" node1="1117832" node2="0" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288287" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288289" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288291" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288293" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectName="宏基4#环网柜母线" PSRType="31100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(170, 0, 0)" stroke-width="5" fill="none" points="407.753600, -433.644286 535.753600, -433.644286" node1="1117845" node2="0" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288295" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288297" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectName="宏基1#配电房母线" PSRType="31100000" />
+                </metadata>
+            </g>
+            <g id="PD_31100000_1341495">
+                <polyline stroke="rgb(170, 0, 0)" stroke-width="5" fill="none" points="604.813600, -433.644286 668.813600, -433.644286" node1="1117852" node2="0" _Dataid="PD_31100000_1341495" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288299" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288301" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_31100000_1341495" ObjectName="宏基2#配电房母线" GlobeID="9113393dcbff80808155838b8d01559113190e2fba" PSRType="31100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(170, 0, 0)" stroke-width="5" fill="none" points="1293.313600, -626.786286 1421.313600, -626.786286" node1="1117859" node2="0" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288303" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288305" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectName="母线" PSRType="31100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(170, 0, 0)" stroke-width="5" fill="none" points="1526.373600, -626.786286 1654.373600, -626.786286" node1="1117866" node2="0" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288307" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288309" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectName="东进4#配电房母线" PSRType="31100000" />
+                </metadata>
+            </g>
+            <g id="PD_31100000_1341418">
+                <polyline stroke="rgb(170, 0, 0)" stroke-width="5" fill="none" points="1056.563600, -165.358286 1184.563600, -165.358286" node1="1117873" node2="0" _Dataid="PD_31100000_1341418" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288311" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288313" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_31100000_1341418" ObjectName="东进6#配电房母线" GlobeID="8c57c48cf48a06deef5583936901558c57b5011597" PSRType="31100000" />
+                </metadata>
+            </g>
+            <g id="PD_31100000_1341419">
+                <polyline stroke="rgb(170, 0, 0)" stroke-width="5" fill="none" points="823.503600, -165.358286 951.503600, -165.358286" node1="1117880" node2="0" _Dataid="PD_31100000_1341419" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288315" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288317" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_31100000_1341419" ObjectName="东进3#配电房母线" GlobeID="8c5715aa018a06deef5583936901558c570626158a" PSRType="31100000" />
+                </metadata>
+            </g>
+            <g id="PD_31100000_1340789">
+                <polyline stroke="rgb(170, 0, 0)" stroke-width="5" fill="none" points="554.445600, -176.786286 682.445600, -176.786286" node1="1117887" node2="0" _Dataid="PD_31100000_1340789" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288319" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288321" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288323" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_31100000_1340789" ObjectName="东进小区环网柜母线" GlobeID="e20cab5c2f8a06deec69cafa7a0169e20be06470e8" PSRType="31100000" />
+                </metadata>
+            </g>
+            <g id="PD_31100000_1965823">
+                <polyline stroke="rgb(170, 0, 0)" stroke-width="5" fill="none" points="1638.623600, -165.358286 1702.623600, -165.358286" node1="1117897" node2="0" _Dataid="PD_31100000_1965823" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288325" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288327" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_31100000_1965823" ObjectName="东进2#配电房母线" GlobeID="8c56aa8ad68a06deef5583936901558c569b0a1582" PSRType="31100000" />
+                </metadata>
+            </g>
+            <g id="PD_31100000_1344876">
+                <polyline stroke="rgb(170, 0, 0)" stroke-width="5" fill="none" points="2108.435600, -638.214886 2236.435600, -638.214886" node1="1117904" node2="0" _Dataid="PD_31100000_1344876" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288329" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288331" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288333" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288335" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_31100000_1344876" ObjectName="启鼎花园配电房母线" GlobeID="9713252370ff808081558391df01559712d2ff6c28" PSRType="31100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <polyline stroke="rgb(170, 0, 0)" stroke-width="5" fill="none" points="843.313600, -748.714866 907.313600, -748.714866" node1="1117917" node2="0" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288337" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectName="东城家园母线1" PSRType="31100000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Other_Layer" />
+        <g id="Disconnector_Layer">
+            <g id="">
+                <use x="1028.7536" y="-734.786286" width="2" height="8" transform="scale(50.000000, 50.000000) translate(-1007.303528, 723.590560) rotate(540.000000, 1028.753600, -734.786286)" xlink:href="#Disconnector_11300000_206001@1" node1="1117925" node2="1117926" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55216" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55217" />
+                    <cge:Layer_Ref ObjectName="Disconnector_Layer" />
+                    <cge:PSR_Ref ObjectName="东进二东五配S081闸刀" PSRType="11300000" />
+                </metadata>
+            </g>
+            <g id="">
+                <use x="1424.0636" y="-273.358286" width="2" height="8" transform="scale(50.000000, 50.000000) translate(-1394.707328, 271.391120) rotate(360.000000, 1424.063600, -273.358286)" xlink:href="#Disconnector_11300000_206001@1" node1="1117934" node2="1117935" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55219" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55220" />
+                    <cge:Layer_Ref ObjectName="Disconnector_Layer" />
+                    <cge:PSR_Ref ObjectName="东进二东六配S121闸刀" PSRType="11300000" />
+                </metadata>
+            </g>
+            <g id="">
+                <use x="1843.8736" y="-734.786286" width="2" height="8" transform="scale(50.000000, 50.000000) translate(-1806.121128, 723.590560) rotate(540.000000, 1843.873600, -734.786286)" xlink:href="#Disconnector_11300000_206001@1" node1="1117939" node2="1117940" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55222" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55223" />
+                    <cge:Layer_Ref ObjectName="Disconnector_Layer" />
+                    <cge:PSR_Ref ObjectName="东进二启配S111闸刀" PSRType="11300000" />
+                </metadata>
+            </g>
+            <g id="">
+                <use x="428.7536" y="-845.286286" width="2" height="8" transform="scale(50.000000, 50.000000) translate(-419.303528, 831.880560) rotate(360.000000, 428.753600, -845.286286)" xlink:href="#Disconnector_11300000_206001@1" node1="1117945" node2="1117946" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55225" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55227" />
+                    <cge:Layer_Ref ObjectName="Disconnector_Layer" />
+                    <cge:PSR_Ref ObjectName="东进二东箱K031闸刀" PSRType="11300000" />
+                </metadata>
+            </g>
+            <g id="">
+                <use x="578.7536" y="-845.286286" width="2" height="8" transform="scale(50.000000, 50.000000) translate(-566.303528, 831.880560) rotate(540.000000, 578.753600, -845.286286)" xlink:href="#Disconnector_11300000_206001@1" node1="1117947" node2="1117948" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55226" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55229" />
+                    <cge:Layer_Ref ObjectName="Disconnector_Layer" />
+                    <cge:PSR_Ref ObjectName="东进二东配K021闸刀" PSRType="11300000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Breaker_Layer">
+            <g id="">
+                <use x="135.2712" y="-734.786286" width="2.11962" height="7.50003" transform="scale(39.999840, 39.999840) translate(-130.970904, 719.666581) rotate(540.000000, 135.271200, -734.786286)" xlink:href="#Breaker_DMS_CXKG_@0" node1="1117829" node2="1117830" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288285" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288286" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectName="泰州.海陵变/10kV.东进2#244开关" PSRType="30500000" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_@@1">
+                <use x="439.7536" y="-668.214886" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-427.880546, 654.744157) rotate(450.000000, 439.753600, -668.214886)" xlink:href="#Breaker_BREAKER_@1" node1="1117833" node2="1117834" _Dataid="PD_30500000_@@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288287" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288288" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_@@1" ObjectName="东进二宏四环S01开关" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_@@1">
+                <use x="567.7536" y="-668.214886" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-552.676894, 654.744157) rotate(450.000000, 567.753600, -668.214886)" xlink:href="#Breaker_BREAKER_@1" node1="1117836" node2="1117837" _Dataid="PD_30500000_@@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288289" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288290" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_@@1" ObjectName="东进二宏东S02开关" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_@@1">
+                <use x="503.7536" y="-668.214886" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-490.278720, 654.744157) rotate(450.000000, 503.753600, -668.214886)" xlink:href="#Breaker_BREAKER_@1" node1="1117839" node2="1117840" _Dataid="PD_30500000_@@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288291" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288292" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_@@1" ObjectName="东进二东城K01开关" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_@@1">
+                <use x="439.7536" y="-608.214886" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-427.880546, 596.245869) rotate(270.000000, 439.753600, -608.214886)" xlink:href="#Breaker_BREAKER_@1" node1="1117842" node2="1117843" _Dataid="PD_30500000_@@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288293" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288294" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_@@1" ObjectName="东进二宏一配S03开关" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_@@1">
+                <use x="439.7536" y="-463.644286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-427.880546, 455.293659) rotate(450.000000, 439.753600, -463.644286)" xlink:href="#Breaker_BREAKER_@1" node1="1117846" node2="1117847" _Dataid="PD_30500000_@@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288295" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288296" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_@@1" ObjectName="东进二宏配一S04开关" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_@@1">
+                <use x="503.7536" y="-463.644286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-490.278720, 455.293659) rotate(450.000000, 503.753600, -463.644286)" xlink:href="#Breaker_BREAKER_@1" node1="1117849" node2="1117850" _Dataid="PD_30500000_@@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288297" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288298" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_@@1" ObjectName="东进二宏一二配S05开关" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_@@1">
+                <use x="1558.3736" y="-656.786286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-1518.503129, 643.601598) rotate(450.000000, 1558.373600, -656.786286)" xlink:href="#Breaker_BREAKER_@1" node1="1117867" node2="1117868" _Dataid="PD_30500000_@@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288307" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288308" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_@@1" ObjectName="东进二东四五配S07开关" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_@@1">
+                <use x="1622.3736" y="-656.786286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-1580.901303, 643.601598) rotate(450.000000, 1622.373600, -656.786286)" xlink:href="#Breaker_BREAKER_@1" node1="1117870" node2="1117871" _Dataid="PD_30500000_@@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288309" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288310" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_@@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_@@1" ObjectName="东进二东配四S10开关" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_30500099@829593@1">
+                <use x="1088.5636" y="-195.358286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-1060.451784, 193.722464) rotate(450.000000, 1088.563600, -195.358286)" xlink:href="#Breaker_BREAKER_@1" node1="1117874" node2="1117875" _Dataid="PD_30500000_30500099@829593@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288311" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288312" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@829593@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_30500099@829593@1" ObjectName="东进二东六三配S17开关" GlobeID="12000007427842" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_30500099@823638@1">
+                <use x="919.5036" y="-195.358286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-895.623108, 193.722464) rotate(450.000000, 919.503600, -195.358286)" xlink:href="#Breaker_BREAKER_@1" node1="1117881" node2="1117882" _Dataid="PD_30500000_30500099@823638@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288315" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288316" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823638@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_30500099@823638@1" ObjectName="东进二东三六配S18开关" GlobeID="12000007332301" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_30500099@823639@1">
+                <use x="855.5036" y="-195.358286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-833.224934, 193.722464) rotate(450.000000, 855.503600, -195.358286)" xlink:href="#Breaker_BREAKER_@1" node1="1117884" node2="1117885" _Dataid="PD_30500000_30500099@823639@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288317" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288318" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823639@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_30500099@823639@1" ObjectName="东进一进配三S06开关" GlobeID="12000007332305" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_30500099@823800@1">
+                <use x="650.4456" y="-146.786286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-633.299234, 146.366150) rotate(270.000000, 650.445600, -146.786286)" xlink:href="#Breaker_BREAKER_@1" node1="1117888" node2="1117889" _Dataid="PD_30500000_30500099@823800@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288319" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288320" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823800@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_30500099@823800@1" ObjectName="东进一进一配S03开关" GlobeID="e20ca90ad78a06deec69cafa7a0169e20bde1570e2" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_30500099@823801@1">
+                <use x="586.4456" y="-206.786286" width="2.11962" height="7.50003" transform="scale(39.999840, 39.999840) translate(-570.865899, 204.866634) rotate(450.000000, 586.445600, -206.786286)" xlink:href="#Breaker_BREAKER_@0" node1="1117891" node2="1117892" _Dataid="PD_30500000_30500099@823801@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288321" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288322" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823801@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_30500099@823801@1" ObjectName="东区一进三配S04开关" GlobeID="e20ca6cf968a06deec69cafa7a0169e20bdbdd70dc" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_30500099@823804@1">
+                <use x="586.4456" y="-146.786286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-570.901061, 146.366150) rotate(270.000000, 586.445600, -146.786286)" xlink:href="#Breaker_BREAKER_@1" node1="1117894" node2="1117895" _Dataid="PD_30500000_30500099@823804@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288323" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288324" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@823804@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_30500099@823804@1" ObjectName="东进一进斜S02开关" GlobeID="e20ca0f5aa8a06deec69cafa7a0169e20bd60c70ca" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_30500099@1523366@1">
+                <use x="1670.6236" y="-135.358286" width="2.11962" height="7.50003" transform="scale(39.999840, 39.999840) translate(-1627.939341, 135.224341) rotate(270.000000, 1670.623600, -135.358286)" xlink:href="#Breaker_BREAKER_@0" node1="1117898" node2="1117899" _Dataid="PD_30500000_30500099@1523366@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288325" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288326" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@1523366@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_30500099@1523366@1" ObjectName="东进二东二一配S14开关" GlobeID="12000007429563" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_30500000_30500099@1523394@1">
+                <use x="1670.6236" y="-195.358286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-1627.943676, 193.722464) rotate(450.000000, 1670.623600, -195.358286)" xlink:href="#Breaker_BREAKER_@1" node1="1117901" node2="1117902" _Dataid="PD_30500000_30500099@1523394@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288327" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288328" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_30500099@1523394@1" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_30500099@1523394@1" ObjectName="东进二东配二S13开关" GlobeID="12000007429559" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="">
+                <use x="678.7536" y="-845.286286" width="2" height="7.508559758" transform="scale(19.244703, 19.244703) translate(-642.829988, 803.818444) rotate(540.000000, 678.753600, -845.286286)" xlink:href="#Breaker_11100000_2040010@1" node1="1117924" node2="1117923" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55215" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55229" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectName="东进二东配K02开关" PSRType="11100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <use x="1128.7536" y="-734.786286" width="2" height="7.508559758" transform="scale(19.244703, 19.244703) translate(-1069.446930, 699.060284) rotate(540.000000, 1128.753600, -734.786286)" xlink:href="#Breaker_11100000_2040010@1" node1="1117927" node2="1117928" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55217" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55218" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectName="东进二东五配S08开关（二遥）" PSRType="11100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <use x="1324.0636" y="-273.358286" width="2" height="7.508559758" transform="scale(19.244703, 19.244703) translate(-1254.608163, 261.609168) rotate(360.000000, 1324.063600, -273.358286)" xlink:href="#Breaker_11100000_2040010@1" node1="1117936" node2="1117937" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55220" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55221" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectName="东进二东六配S12开关" PSRType="11100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <use x="1943.8736" y="-734.786286" width="2" height="7.508559758" transform="scale(19.244703, 19.244703) translate(-1842.211378, 699.060284) rotate(540.000000, 1943.873600, -734.786286)" xlink:href="#Breaker_11100000_2040010@1" node1="1117941" node2="1117942" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55223" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55224" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectName="东进二启配S11开关" PSRType="11100000" />
+                </metadata>
+            </g>
+            <g id="">
+                <use x="328.7536" y="-845.286286" width="2" height="7.508559758" transform="scale(19.244703, 19.244703) translate(-311.016811, 803.818444) rotate(360.000000, 328.753600, -845.286286)" xlink:href="#Breaker_11100000_2040010@1" node1="1117949" node2="1117950" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_55227" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_55228" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectName="东进二东箱K03开关（二遥）" PSRType="11100000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="LoadBreakSwitch_Layer">
+            <g id="PD_30700000_30700002@2743649@1">
+                <use x="636.8136" y="-403.644286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-620.008423, 396.795371) rotate(270.000000, 636.813600, -403.644286)" xlink:href="#LoadBreakSwitch_BREAKER_@1" node1="1117853" node2="1117854" _Dataid="PD_30700000_30700002@2743649@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288299" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288300" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2743649@1" />
+                    <cge:Layer_Ref ObjectName="LoadBreakSwitch_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30700000_30700002@2743649@1" ObjectName="渔场基配二S06开关" GlobeID="12000007287504" PSRType="30700002" />
+                </metadata>
+            </g>
+            <g id="PD_30700000_30700002@2743650@1">
+                <use x="636.8136" y="-463.644286" width="2.11962" height="7.50003" transform="scale(39.999840, 39.999840) translate(-619.974694, 455.303158) rotate(450.000000, 636.813600, -463.644286)" xlink:href="#LoadBreakSwitch_BREAKER_@0" node1="1117856" node2="1117857" _Dataid="PD_30700000_30700002@2743650@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288301" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288302" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2743650@1" />
+                    <cge:Layer_Ref ObjectName="LoadBreakSwitch_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30700000_30700002@2743650@1" ObjectName="东进二宏二一配S06开关" GlobeID="12000007287505" PSRType="30700002" />
+                </metadata>
+            </g>
+            <g id="PD_30700000_@@1">
+                <use x="1325.3136" y="-656.786286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-1291.276279, 643.601598) rotate(450.000000, 1325.313600, -656.786286)" xlink:href="#LoadBreakSwitch_BREAKER_@1" node1="1117860" node2="1117861" _Dataid="PD_30700000_@@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288303" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288304" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_@@1" />
+                    <cge:Layer_Ref ObjectName="LoadBreakSwitch_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30700000_@@1" ObjectName="东进二东配五S09开关" PSRType="30700002" />
+                </metadata>
+            </g>
+            <g id="PD_30700000_@@1">
+                <use x="1389.3136" y="-656.786286" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-1353.674453, 643.601598) rotate(450.000000, 1389.313600, -656.786286)" xlink:href="#LoadBreakSwitch_BREAKER_@1" node1="1117863" node2="1117864" _Dataid="PD_30700000_@@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288305" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288306" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_@@1" />
+                    <cge:Layer_Ref ObjectName="LoadBreakSwitch_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30700000_@@1" ObjectName="东进二东五四配S20开关" PSRType="30700002" />
+                </metadata>
+            </g>
+            <g id="PD_30700000_30700002@2743289@1">
+                <use x="1152.5636" y="-195.358286" width="2.11962" height="7.50003" transform="scale(39.999840, 39.999840) translate(-1122.830893, 193.724335) rotate(450.000000, 1152.563600, -195.358286)" xlink:href="#LoadBreakSwitch_BREAKER_@0" node1="1117877" node2="1117878" _Dataid="PD_30700000_30700002@2743289@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288313" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288314" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2743289@1" />
+                    <cge:Layer_Ref ObjectName="LoadBreakSwitch_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30700000_30700002@2743289@1" ObjectName="东进二东配六S16开关" GlobeID="12000007427846" PSRType="30700002" />
+                </metadata>
+            </g>
+            <g id="PD_30700000_30700002@2741173@1">
+                <use x="2140.4356" y="-668.214886" width="2.11962" height="7.50003" transform="scale(39.999840, 39.999840) translate(-2086.005994, 654.759473) rotate(450.000000, 2140.435600, -668.214886)" xlink:href="#LoadBreakSwitch_BREAKER_@0" node1="1117905" node2="1117906" _Dataid="PD_30700000_30700002@2741173@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288329" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288330" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2741173@1" />
+                    <cge:Layer_Ref ObjectName="LoadBreakSwitch_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30700000_30700002@2741173@1" ObjectName="东进二配启S19开关" GlobeID="12000007231022" PSRType="30700002" />
+                </metadata>
+            </g>
+            <g id="PD_30700000_30700002@2741174@1">
+                <use x="2140.4356" y="-608.214886" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-2085.996971, 596.245869) rotate(270.000000, 2140.435600, -608.214886)" xlink:href="#LoadBreakSwitch_BREAKER_@1" node1="1117908" node2="1117909" _Dataid="PD_30700000_30700002@2741174@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288331" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288332" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2741174@1" />
+                    <cge:Layer_Ref ObjectName="LoadBreakSwitch_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30700000_30700002@2741174@1" ObjectName="101至1#变101开关" GlobeID="12000007231028" PSRType="30700002" />
+                </metadata>
+            </g>
+            <g id="PD_30700000_30700002@2741175@1">
+                <use x="2204.4356" y="-668.214886" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-2148.395145, 654.744157) rotate(450.000000, 2204.435600, -668.214886)" xlink:href="#LoadBreakSwitch_BREAKER_@1" node1="1117911" node2="1117912" _Dataid="PD_30700000_30700002@2741175@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288333" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288334" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@2741175@1" />
+                    <cge:Layer_Ref ObjectName="LoadBreakSwitch_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30700000_30700002@2741175@1" ObjectName="102至2#变102开关" GlobeID="12000007231038" PSRType="30700002" />
+                </metadata>
+            </g>
+            <g id="PD_30700000_30700002@3126746@1">
+                <use x="2204.4356" y="-608.214886" width="2.11962" height="7.50003" transform="scale(39.999840, 39.999840) translate(-2148.405988, 596.259479) rotate(270.000000, 2204.435600, -608.214886)" xlink:href="#LoadBreakSwitch_BREAKER_@0" node1="1117914" node2="1117915" _Dataid="PD_30700000_30700002@3126746@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288335" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288336" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_30700002@3126746@1" />
+                    <cge:Layer_Ref ObjectName="LoadBreakSwitch_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30700000_30700002@3126746@1" ObjectName="东进一配鼎S11开关" GlobeID="12000007231020" PSRType="30700002" />
+                </metadata>
+            </g>
+            <g id="PD_30700000_@@1">
+                <use x="875.3136" y="-778.714866" width="2" height="7.508559758" transform="scale(39.954400, 39.954400) translate(-852.539118, 762.478485) rotate(450.000000, 875.313600, -778.714866)" xlink:href="#LoadBreakSwitch_BREAKER_@1" node1="1117918" node2="1117919" _Dataid="PD_30700000_@@1" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_288337" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_288338" />
+                    <cge:GLink_Ref ObjectID="PD_30700000_@@1" />
+                    <cge:Layer_Ref ObjectName="LoadBreakSwitch_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30700000_@@1" ObjectName="244东进2#线244开关" PSRType="30700002" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Text_Layer">
+            <g id="1693_329800_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="387.837955" y="-647.6428865" style="text-anchor:middle">宏基</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329800_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="387.837955" y="-633.3428865" style="text-anchor:middle">4#环</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329800_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="387.837955" y="-619.0428865" style="text-anchor:middle">网柜</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329801_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="534.5299474" y="-193.9282862" style="text-anchor:middle">东进</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329801_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="534.5299474" y="-179.6282862" style="text-anchor:middle">小区</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329801_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="534.5299474" y="-165.3282862" style="text-anchor:middle">环网</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329801_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="534.5299474" y="-151.0282862" style="text-anchor:middle">柜</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329802_0">
+                <text font-size="24" font-family="SimSun" stroke="rgb(255, 0, 0)" stroke-width="0.8" x="46.92159977" y="-727.786286" style="text-anchor:middle">海陵变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329803_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="1028.7536" y="-746.4522864" style="text-anchor:middle">S081</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329804_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="1424.0636" y="-285.0242864" style="text-anchor:middle">S121</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329805_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="1843.8736" y="-746.4522864" style="text-anchor:middle">S111</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329806_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="428.7536" y="-856.9522864" style="text-anchor:middle">K031</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329807_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="578.7536" y="-856.9522864" style="text-anchor:middle">K021</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329848_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="160.0331991" y="-743.0242869" style="text-anchor:middle">东进2#244开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329808_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="663.8136019" y="-416.644286" style="text-anchor:middle">渔场 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329808_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="663.8136019" y="-405.644286" style="text-anchor:middle">基配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329808_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="663.8136019" y="-394.644286" style="text-anchor:middle">二 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329808_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="663.8136019" y="-383.644286" style="text-anchor:middle">S06</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329809_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="663.8136019" y="-484.644286" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329809_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="663.8136019" y="-473.644286" style="text-anchor:middle">二宏 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329809_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="663.8136019" y="-462.644286" style="text-anchor:middle">二一 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329809_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="663.8136019" y="-451.644286" style="text-anchor:middle">配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329809_4">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="663.8136019" y="-440.644286" style="text-anchor:middle">S06</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329810_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1352.313602" y="-666.3582865" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329810_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1352.313602" y="-655.3582865" style="text-anchor:middle">二东 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329810_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1352.313602" y="-644.3582865" style="text-anchor:middle">配五 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329810_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1352.313602" y="-633.3582865" style="text-anchor:middle">S09</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329811_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1416.313602" y="-677.786286" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329811_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1416.313602" y="-666.786286" style="text-anchor:middle">二东 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329811_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1416.313602" y="-655.786286" style="text-anchor:middle">五四 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329811_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1416.313602" y="-644.786286" style="text-anchor:middle">配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329811_4">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1416.313602" y="-633.786286" style="text-anchor:middle">S20</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329812_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1179.563602" y="-204.9302865" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329812_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1179.563602" y="-193.9302865" style="text-anchor:middle">二东 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329812_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1179.563602" y="-182.9302865" style="text-anchor:middle">配六 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329812_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1179.563602" y="-171.9302865" style="text-anchor:middle">S16</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329813_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2167.435602" y="-677.7868865" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329813_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2167.435602" y="-666.7868865" style="text-anchor:middle">二配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329813_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2167.435602" y="-655.7868865" style="text-anchor:middle">启 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329813_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2167.435602" y="-644.7868865" style="text-anchor:middle">S19</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329814_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2167.435602" y="-621.214886" style="text-anchor:middle">101 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329814_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2167.435602" y="-610.214886" style="text-anchor:middle">至1# </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329814_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2167.435602" y="-599.214886" style="text-anchor:middle">变 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329814_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2167.435602" y="-588.214886" style="text-anchor:middle">101</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329815_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2231.435602" y="-677.7868865" style="text-anchor:middle">102 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329815_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2231.435602" y="-666.7868865" style="text-anchor:middle">至2# </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329815_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2231.435602" y="-655.7868865" style="text-anchor:middle">变 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329815_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2231.435602" y="-644.7868865" style="text-anchor:middle">102</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329816_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2231.435602" y="-621.214886" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329816_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2231.435602" y="-610.214886" style="text-anchor:middle">一配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329816_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2231.435602" y="-599.214886" style="text-anchor:middle">鼎 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329816_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="2231.435602" y="-588.214886" style="text-anchor:middle">S11</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329817_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="902.3136019" y="-788.2868665" style="text-anchor:middle">244 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329817_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="902.3136019" y="-777.2868665" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329817_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="902.3136019" y="-766.2868665" style="text-anchor:middle">2#线 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329817_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="902.3136019" y="-755.2868665" style="text-anchor:middle">244</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329818_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="466.7536019" y="-677.7868865" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329818_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="466.7536019" y="-666.7868865" style="text-anchor:middle">二宏 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329818_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="466.7536019" y="-655.7868865" style="text-anchor:middle">四环 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329818_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="466.7536019" y="-644.7868865" style="text-anchor:middle">S01</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329819_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="594.7536019" y="-677.7868865" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329819_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="594.7536019" y="-666.7868865" style="text-anchor:middle">二宏 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329819_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="594.7536019" y="-655.7868865" style="text-anchor:middle">东 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329819_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="594.7536019" y="-644.7868865" style="text-anchor:middle">S02</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329820_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="530.7536019" y="-677.7868865" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329820_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="530.7536019" y="-666.7868865" style="text-anchor:middle">二东 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329820_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="530.7536019" y="-655.7868865" style="text-anchor:middle">城 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329820_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="530.7536019" y="-644.7868865" style="text-anchor:middle">K01</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329821_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="466.7536019" y="-621.214886" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329821_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="466.7536019" y="-610.214886" style="text-anchor:middle">二宏 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329821_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="466.7536019" y="-599.214886" style="text-anchor:middle">一配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329821_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="466.7536019" y="-588.214886" style="text-anchor:middle">S03</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329822_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="466.7536019" y="-473.2162865" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329822_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="466.7536019" y="-462.2162865" style="text-anchor:middle">二宏 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329822_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="466.7536019" y="-451.2162865" style="text-anchor:middle">配一 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329822_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="466.7536019" y="-440.2162865" style="text-anchor:middle">S04</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329823_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="530.7536019" y="-484.644286" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329823_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="530.7536019" y="-473.644286" style="text-anchor:middle">二宏 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329823_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="530.7536019" y="-462.644286" style="text-anchor:middle">一二 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329823_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="530.7536019" y="-451.644286" style="text-anchor:middle">配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329823_4">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="530.7536019" y="-440.644286" style="text-anchor:middle">S05</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329824_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1585.373602" y="-677.786286" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329824_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1585.373602" y="-666.786286" style="text-anchor:middle">二东 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329824_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1585.373602" y="-655.786286" style="text-anchor:middle">四五 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329824_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1585.373602" y="-644.786286" style="text-anchor:middle">配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329824_4">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1585.373602" y="-633.786286" style="text-anchor:middle">S07</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329825_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1649.373602" y="-666.3582865" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329825_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1649.373602" y="-655.3582865" style="text-anchor:middle">二东 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329825_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1649.373602" y="-644.3582865" style="text-anchor:middle">配四 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329825_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1649.373602" y="-633.3582865" style="text-anchor:middle">S10</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329826_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1115.563602" y="-216.358286" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329826_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1115.563602" y="-205.358286" style="text-anchor:middle">二东 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329826_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1115.563602" y="-194.358286" style="text-anchor:middle">六三 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329826_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1115.563602" y="-183.358286" style="text-anchor:middle">配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329826_4">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1115.563602" y="-172.358286" style="text-anchor:middle">S17</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329827_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="946.5036019" y="-216.358286" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329827_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="946.5036019" y="-205.358286" style="text-anchor:middle">二东 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329827_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="946.5036019" y="-194.358286" style="text-anchor:middle">三六 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329827_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="946.5036019" y="-183.358286" style="text-anchor:middle">配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329827_4">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="946.5036019" y="-172.358286" style="text-anchor:middle">S18</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329828_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="882.5036019" y="-204.9302865" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329828_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="882.5036019" y="-193.9302865" style="text-anchor:middle">一进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329828_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="882.5036019" y="-182.9302865" style="text-anchor:middle">配三 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329828_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="882.5036019" y="-171.9302865" style="text-anchor:middle">S06</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329829_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="677.4456019" y="-159.786286" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329829_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="677.4456019" y="-148.786286" style="text-anchor:middle">一进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329829_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="677.4456019" y="-137.786286" style="text-anchor:middle">一配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329829_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="677.4456019" y="-126.786286" style="text-anchor:middle">S03</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329830_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="613.4456019" y="-216.3582865" style="text-anchor:middle">东区 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329830_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="613.4456019" y="-205.3582865" style="text-anchor:middle">一进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329830_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="613.4456019" y="-194.3582865" style="text-anchor:middle">三配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329830_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="613.4456019" y="-183.3582865" style="text-anchor:middle">S04</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329831_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="613.4456019" y="-159.786286" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329831_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="613.4456019" y="-148.786286" style="text-anchor:middle">一进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329831_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="613.4456019" y="-137.786286" style="text-anchor:middle">斜 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329831_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="613.4456019" y="-126.786286" style="text-anchor:middle">S02</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329832_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1697.623602" y="-148.358286" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329832_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1697.623602" y="-137.358286" style="text-anchor:middle">二东 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329832_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1697.623602" y="-126.358286" style="text-anchor:middle">二一 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329832_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1697.623602" y="-115.358286" style="text-anchor:middle">配 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329832_4">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1697.623602" y="-104.358286" style="text-anchor:middle">S14</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329833_0">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1697.623602" y="-204.9302865" style="text-anchor:middle">东进 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329833_1">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1697.623602" y="-193.9302865" style="text-anchor:middle">二东 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329833_2">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1697.623602" y="-182.9302865" style="text-anchor:middle">配二 </text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329833_3">
+                <text font-size="10" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.3333333333" x="1697.623602" y="-171.9302865" style="text-anchor:middle">S13</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329843_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="678.7536" y="-870.286286" style="text-anchor:middle">东进二东配</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329843_1">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="678.7536" y="-857.086286" style="text-anchor:middle">K02开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329844_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="1128.7536" y="-773.1202856" style="text-anchor:middle">东进二东五</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329844_1">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="1128.7536" y="-759.9202856" style="text-anchor:middle">配S08开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329844_2">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="1128.7536" y="-746.7202856" style="text-anchor:middle">（二遥）</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329845_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="1324.0636" y="-298.358286" style="text-anchor:middle">东进二东六</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329845_1">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="1324.0636" y="-285.158286" style="text-anchor:middle">配S12开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329846_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="1943.8736" y="-759.786286" style="text-anchor:middle">东进二启配</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329846_1">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="1943.8736" y="-746.586286" style="text-anchor:middle">S11开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329847_0">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="328.7536" y="-883.6202856" style="text-anchor:middle">东进二东箱</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329847_1">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="328.7536" y="-870.4202856" style="text-anchor:middle">K03开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329847_2">
+                <text font-size="12" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4" x="328.7536" y="-857.2202856" style="text-anchor:middle">（二遥）</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329834_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="387.8379474" y="-453.5722865" style="text-anchor:middle">宏基</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329834_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="387.8379474" y="-439.2722865" style="text-anchor:middle">1#配</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329834_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="387.8379474" y="-424.9722865" style="text-anchor:middle">电房</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329835_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="584.8979474" y="-443.0722865" style="text-anchor:middle">宏基</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329835_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="584.8979474" y="-428.7722865" style="text-anchor:middle">2#配</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329835_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="584.8979474" y="-414.4722865" style="text-anchor:middle">电房</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329836_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="1273.397947" y="-646.7142865" style="text-anchor:middle">东进</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329836_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="1273.397947" y="-632.4142865" style="text-anchor:middle">5#配</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329836_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="1273.397947" y="-618.1142865" style="text-anchor:middle">电房</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329837_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="1506.457947" y="-646.7142865" style="text-anchor:middle">东进</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329837_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="1506.457947" y="-632.4142865" style="text-anchor:middle">4#配</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329837_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="1506.457947" y="-618.1142865" style="text-anchor:middle">电房</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329838_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="1036.647947" y="-185.2862865" style="text-anchor:middle">东进</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329838_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="1036.647947" y="-170.9862865" style="text-anchor:middle">6#配</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329838_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="1036.647947" y="-156.6862865" style="text-anchor:middle">电房</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329839_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="803.5879474" y="-185.2862865" style="text-anchor:middle">东进</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329839_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="803.5879474" y="-170.9862865" style="text-anchor:middle">3#配</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329839_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="803.5879474" y="-156.6862865" style="text-anchor:middle">电房</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329840_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="1618.707947" y="-174.7862865" style="text-anchor:middle">东进</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329840_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="1618.707947" y="-160.4862865" style="text-anchor:middle">2#配</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329840_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="1618.707947" y="-146.1862865" style="text-anchor:middle">电房</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329841_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="2088.519947" y="-655.3568862" style="text-anchor:middle">启鼎</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329841_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="2088.519947" y="-641.0568862" style="text-anchor:middle">花园</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329841_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="2088.519947" y="-626.7568862" style="text-anchor:middle">配电</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329841_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="2088.519947" y="-612.4568862" style="text-anchor:middle">房</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329842_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="823.3979474" y="-760.9288662" style="text-anchor:middle">东城</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_329842_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(255, 255, 255)" stroke-width="0.4333333333" x="823.3979474" y="-746.6288662" style="text-anchor:middle">家园</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Hot_Layer">
+            <g id="1693_329849" />
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="585.017028" y="-64.42914355" style="text-anchor:middle">至 </text>
+            </a>
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="585.017028" y="-51.22914355" style="text-anchor:middle">10KV </text>
+            </a>
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="585.017028" y="-38.02914355" style="text-anchor:middle">东进 </text>
+            </a>
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="585.017028" y="-24.82914355" style="text-anchor:middle">1#235 </text>
+            </a>
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="585.017028" y="-11.62914355" style="text-anchor:middle">线</text>
+            </a>
+            <g id="1693_329850" />
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="649.017028" y="-64.42914355" style="text-anchor:middle">至 </text>
+            </a>
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="649.017028" y="-51.22914355" style="text-anchor:middle">10KV </text>
+            </a>
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="649.017028" y="-38.02914355" style="text-anchor:middle">东进 </text>
+            </a>
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="649.017028" y="-24.82914355" style="text-anchor:middle">1#235 </text>
+            </a>
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="649.017028" y="-11.62914355" style="text-anchor:middle">线</text>
+            </a>
+            <g id="1693_329851" />
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="2203.007028" y="-525.8583435" style="text-anchor:middle">至 </text>
+            </a>
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="2203.007028" y="-512.6583435" style="text-anchor:middle">10KV </text>
+            </a>
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="2203.007028" y="-499.4583435" style="text-anchor:middle">东进 </text>
+            </a>
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="2203.007028" y="-486.2583435" style="text-anchor:middle">1#235 </text>
+            </a>
+            <a xlink:href="10KV东进1#235线单线图简图@3020">
+                <text font-size="12" font-family="SimSun" stroke="rgb(16, 195, 192)" stroke-width="0.4" x="2203.007028" y="-473.0583435" style="text-anchor:middle">线</text>
+            </a>
+        </g>
+    </g>
+</svg>

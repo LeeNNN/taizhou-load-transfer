@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg width="716" height="594" viewBox="0 0 716 594" onload="init(evt)" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cge="http://iec.ch/TC57/2005/SVG-schema#">
+    <style type="text/css">
+        <![CDATA[]]>
+    </style>
+    <script type="text/ecmascript">
+        var transMatrix = [1, 0, 0, 1, 0, 0];
+        function clickChild(evt){window.parent.clickChild(evt);}
+        function init(evt) {
+        if (window.svgDocument == null) {
+        svgDoc = evt.target.ownerDocument;
+        }
+        mapMatrix = svgDoc.getElementById(&quot;map-matrix&quot;);
+        clientWidth = svgDoc.documentElement.clientWidth;
+        clientHeight = svgDoc.documentElement.clientHeight;
+        getlayer(svgDoc);
+        addEvent(mapMatrix);
+        width = mapMatrix.firstElementChild.width.animVal.value;
+        height = mapMatrix.firstElementChild.height.animVal.value;
+        transMatrix[0] = 1;
+        transMatrix[3] = 1;
+        transMatrix[4] = -(width/2)+(clientWidth/2);
+        transMatrix[5] = -(height/2)+(clientHeight/2);
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);
+        zoomIn(clientHeight/height);
+        }
+        function addEvent(mapMatrix) {
+        if(document.addEventListener){
+        mapMatrix.addEventListener(&apos;DOMMouseScroll&apos;,mousewheel,false);}
+        mapMatrix.setAttribute(&quot;onmousewheel&quot;, &quot;mousewheel(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmouseup&quot;, &quot;mouseup(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousedown&quot;, &quot;mousedown(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousemove&quot;,&quot;mousemove(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousemout&quot;, &quot;mousemout(evt)&quot;);
+        }
+        function mousewheel(evt) {
+        if (evt.wheelDelta) {
+        console.log(evt.wheelDelta);
+        if (evt.wheelDelta == 120) {
+        zoomOut(1.25);
+        }else if(evt.wheelDelta == 180){
+        zoomOut(1.25);
+        } else {
+        zoomIn(0.8);
+        }
+        } else if (evt.detail) {
+        if (evt.detail == -3) {
+        zoomOut(1.25);
+        } else {
+        zoomIn(0.8);}}}
+        var downx = 0;var downy = 0;var downclick = 0;var movex = transMatrix[4];var movey = transMatrix[5];
+        function mouseup(evt) {
+        var oEvent = evt || event;
+        var x = (oEvent.clientX - downx);
+        var y = (oEvent.clientY - downy);
+        movex += x;
+        movey += y;
+        downclick = 0;downx = 0;downy = 0;}
+        function mousemout(evt) {
+        downclick = 0;downx = 0;downy = 0;}
+        function mousedown(evt) {
+        var oEvent = evt || event;
+        downclick = 1;
+        downx = oEvent.clientX;
+        downy = oEvent.clientY;}
+        function mousemove(evt) {
+        if (downclick == 1) {
+        var oEvent = evt || event;
+        var x = (oEvent.clientX - downx);
+        var y = (oEvent.clientY - downy);
+        transMatrix[4] = x + movex;
+        transMatrix[5] = y + movey;
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) +&quot;)&quot;;
+        mapMatrix.setAttributeNS(null,&quot;transform&quot;, newMatrix);}}
+        function getlayer(SvgMainMapDoc) {
+        var node = SvgMainMapDoc.documentElement;
+        findnode(node)}
+        function findnode(node) {
+        for (var i = 0; i &lt; node.childNodes.length; i++) {
+        if (node.childNodes.item(i).nodeType != 3 &amp;&amp; node.childNodes.item(i).nodeType != 4) {
+        var child = node.childNodes.item(i);
+        if (child.getAttribute(&quot;id&quot;) &amp;&amp; child.getAttribute(&quot;objid&quot;) != &quot;&quot; &amp;&amp; child.getAttribute(&quot;objid&quot;) != null) {
+        /*child.setAttribute(&quot;onclick&quot;, &quot;click(this)&quot;); */}
+        if (child.childNodes) {
+        findnode(child);
+        } else {
+        break;
+        }}}}
+        function click(evt) {
+        /*alert(evt.getAttribute(&quot;objid&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objtype&quot;)+&quot;_&quot;+evt.getAttribute(&quot;name&quot;)); */}
+        function move(evt){
+        var id = evt.getAttribute(&quot;objtype&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objid&quot;)
+        var node = svgDoc.documentElement;
+        opacity(node,&quot;1&quot;,id);}
+        function out(evt){
+        var id = evt.getAttribute(&quot;objtype&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objid&quot;)
+        var node = svgDoc.documentElement;
+        opacity(node,&quot;0&quot;,id); }
+        function opacity(node,value,id){
+        for (var i = 0; i &lt; node.childNodes.length; i++) {
+        if (node.childNodes.item(i).nodeType != 3 &amp;&amp; node.childNodes.item(i).nodeType != 4) {
+        var child = node.childNodes.item(i);
+        if (child.getAttribute(&quot;opacity&quot;) &amp;&amp; child.getAttribute(&quot;geoLabel&quot;) != null &amp;&amp;child.getAttribute(&quot;geoLabel&quot;) == id ) {
+        child.setAttribute(&quot;opacity&quot;, value);}
+        if (child.childNodes) {
+        opacity(child,value,id);
+        } else {
+        break;}}}}
+        function pan(dx, dy) {
+        transMatrix[4] += dx;
+        transMatrix[5] += dy;
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos;&apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+        function zoomIn(scale) {
+        console.log(scale);
+        if(transMatrix[0] &lt; 0.02 )
+        return;
+        for (var i = 0; i &lt; transMatrix.length; i++) {
+        transMatrix[i] *= scale;}
+        transMatrix[4] += (1 - scale) * clientWidth / 2;
+        transMatrix[5] += (1 - scale) * clientHeight / 2;
+        movex = transMatrix[4];
+        movey = transMatrix[5];
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+        function zoomOut(scale) {
+        console.log(scale);
+        if(transMatrix[0]&gt;10 ) 
+        return;
+        for (var i = 0; i &lt; transMatrix.length; i++) {
+        transMatrix[i] *= scale;}
+        transMatrix[4] += (1 - scale) * clientWidth / 2;
+        transMatrix[5] += (1 - scale) * clientHeight / 2;
+        movex = transMatrix[4];
+        movey = transMatrix[5];
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+    </script>
+    <defs>
+        <symbol id="Breaker_DMS_CXKG_@1" viewBox="0.0000 0.0000 2.0000 7.5086">
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="rgb(255, 0, 0)" points="0.000000, 1.254270 0.000000, 6.254290 2.000000, 6.254290 2.000000, 1.254270 0.000000, 1.254270" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 2.502853 1.000000, 0.000000" />
+            <polyline stroke="rgb(255, 0, 0)" stroke-width="0.06666666667" fill="none" points="1.000000, 5.005707 1.000000, 7.508560" />
+        </symbol>
+        <symbol id="Breaker_DMS_CXKG_@0" viewBox="0.0000 0.0000 2.1196 7.5000">
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 1.212060 1.059810, 0.000000" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="0.000000, 1.225650 0.000000, 6.262610 2.082620, 6.262610 2.082620, 1.225650 0.000000, 1.225650" />
+            <polyline stroke="rgb(0, 170, 0)" stroke-width="0.070654" fill="none" points="1.059810, 6.258430 1.059810, 7.500030" />
+        </symbol>
+    </defs>
+    <g id="map-matrix" transform="matrix(1 0 0 1 0 0)">
+        <g id="bglayer">
+            <rect width="716" x="0.0" height="594" y="0.0" style="fill:#fff;" />
+        </g>
+        <g id="Other_Layer">
+            <g id="1651_34021">
+                <polyline stroke="rgb(0, 0, 0)" stroke-width="5" fill="none" points="0.000000, -293.900607 0.000000, 0.000000 415.701000, 0.000000 415.701000, -293.900607 0.000000, -293.900607" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Other_Layer" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Substation_Layer">
+            <g id="113997367362977800">
+                <polygon stroke="rgb(0, 0, 0)" stroke-width="1" fill="none" points="22.600500, -112.313209 246.600500, -112.313209 246.600500, -183.730666 22.600500, -183.730666 22.600500, -112.313209" node1="0" node2="0" _Dataid="113997367362977800" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Substation_Layer" />
+                    <cge:PSR_Ref ObjectID="113997367362977800" ObjectName="海陵变" PSRType="30000000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="ACLineSegment_Layer">
+            <g id="PD_20100000_1573910">
+                <polyline stroke="rgb(0, 0, 255)" stroke-width="7.5" fill="none" points="166.600500, -133.313209 293.100500, -133.313209" stroke-dasharray="25 8" node1="1575938" node2="1575939" _Dataid="PD_20100000_1573910" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_439904" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_2285955" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_1573910" ObjectName="鑫隆253断路器~鑫隆2#分支箱" GlobeID="14000176900921" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="PD_20100000_2285955">
+                <polyline stroke="rgb(0, 0, 255)" stroke-width="7.5" fill="none" points="293.100500, -133.313209 313.100500, -133.313209" stroke-dasharray="25 8" node1="1575939" node2="1575940" _Dataid="PD_20100000_2285955" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_20100000_1573910" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_2285954" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_2285955" ObjectName="鑫隆253断路器~鑫隆2#分支箱" GlobeID="SBID000000693EC523B46C4092915B962BFBF0EBF7" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="PD_20100000_2285954">
+                <polyline stroke="rgb(0, 0, 255)" stroke-width="7.5" fill="none" points="313.100500, -133.313209 333.100500, -133.313209" stroke-dasharray="25 8" node1="1575940" node2="1575941" _Dataid="PD_20100000_2285954" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_20100000_1573909" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_2285955" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_2285954" ObjectName="鑫隆2#分支箱~鑫隆1#分支箱" GlobeID="SBID0000007AD27593E1D441CF9AE40AFFEAD92466" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="PD_20100000_1573909">
+                <polyline stroke="rgb(0, 0, 255)" stroke-width="7.5" fill="none" points="333.100500, -133.313209 353.100500, -133.313209" stroke-dasharray="25 8" node1="1575941" node2="1575942" _Dataid="PD_20100000_1573909" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_20100000_2285952" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_2285954" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_1573909" ObjectName="鑫隆2#分支箱~鑫隆1#分支箱" GlobeID="14000176900424" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="PD_20100000_2285952">
+                <polyline stroke="rgb(0, 0, 255)" stroke-width="7.5" fill="none" points="353.100500, -133.313209 373.100500, -133.313209" stroke-dasharray="25 8" node1="1575942" node2="1575943" _Dataid="PD_20100000_2285952" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_20100000_1573909" />
+                    <cge:GLink_Ref ObjectID="PD_20100000_1576494" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_2285952" ObjectName="鑫隆1#分支箱~泰州世纪联华商业有限公司海陵店" GlobeID="SBID0000006AA1122C219B4F2C9D33C906B24A3BC1" PSRType="20100000" />
+                </metadata>
+            </g>
+            <g id="PD_20100000_1576494">
+                <polyline stroke="rgb(0, 0, 255)" stroke-width="7.5" fill="none" points="373.100500, -133.313209 393.100500, -133.313209" stroke-dasharray="25 8" node1="1575943" node2="1575944" _Dataid="PD_20100000_1576494" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_20100000_2285952" />
+                    <cge:Layer_Ref ObjectName="ACLineSegment_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_20100000_1576494" ObjectName="鑫隆1#分支箱~泰州世纪联华商业有限公司海陵店" GlobeID="14000176899932" PSRType="20100000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="BusbarSection_Layer">
+            <g id="115404742246531175">
+                <polyline stroke="rgb(107, 61, 24)" stroke-width="10" fill="none" points="134.600500, -126.313209 134.600500, -140.313209" node1="1575935" node2="0" _Dataid="115404742246531175" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_439903" />
+                    <cge:Layer_Ref ObjectName="BusbarSection_Layer" />
+                    <cge:PSR_Ref ObjectID="115404742246531175" ObjectName="泰州.海陵变/10kV.10kVⅡ段母线" GlobeID="115404742246531175" PSRType="31100000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="ConnLine_Layer">
+            <g id="PD_14000000_439903">
+                <polyline stroke="rgb(13, 113, 116)" stroke-width="5" fill="none" points="134.600500, -133.313209 136.600500, -133.313209" node1="1575935" node2="1575936" _Dataid="PD_14000000_439903" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="115404742246531175" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_557544" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_439903" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_439904">
+                <polyline stroke="rgb(13, 113, 116)" stroke-width="5" fill="none" points="164.600500, -133.313209 166.600500, -133.313209" node1="1575937" node2="1575938" _Dataid="PD_14000000_439904" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_20100000_1573910" />
+                    <cge:GLink_Ref ObjectID="PD_30500000_557544" />
+                    <cge:Layer_Ref ObjectName="ConnLine_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_439904" ObjectName="null" PSRType="36000000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Breaker_Layer">
+            <g id="PD_30500000_557544">
+                <use x="150.6005" y="-133.3132085" width="2.11962" height="7.50003" transform="scale(27.999888, 27.999888) translate(-144.303387, 131.802029) rotate(540.000000, 150.600500, -133.313209)" xlink:href="#Breaker_DMS_CXKG_@0" node1="1575936" node2="1575937" _Dataid="PD_30500000_557544" />
+                <metadata>
+                    <cge:GLink_Ref ObjectID="PD_14000000_439903" />
+                    <cge:GLink_Ref ObjectID="PD_14000000_439904" />
+                    <cge:Layer_Ref ObjectName="Breaker_Layer" />
+                    <cge:PSR_Ref ObjectID="PD_30500000_557544" ObjectName="泰州.海陵变/10kV.鑫隆253开关" GlobeID="114560317316400966" PSRType="30500000" />
+                </metadata>
+            </g>
+        </g>
+        <g id="North_Layer" />
+        <g id="Text_Layer">
+            <g id="1693_505170_0">
+                <text font-size="24" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.8" x="125.0764998" y="-148.1599367" style="text-anchor:middle">海陵变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+            <g id="1693_505171_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="186.6005" y="-111.0752077" style="text-anchor:middle">鑫隆253开关</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="Text_Layer" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Hot_Layer" />
+    </g>
+</svg>

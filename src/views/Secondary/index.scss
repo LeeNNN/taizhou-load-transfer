@@ -85,3 +85,12 @@
     border-top-color: #2f3957 !important;
   }
 }
+
+.no-data {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: url("../../assets/images/no-data.png") no-repeat center;
+}

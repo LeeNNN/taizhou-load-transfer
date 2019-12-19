@@ -1,0 +1,673 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg width="934" height="860" viewBox="0 0 934 860" onload="init(evt)" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:cge="http://iec.ch/TC57/2005/SVG-schema#">
+    <style type="text/css">
+        <![CDATA[]]>
+    </style>
+    <script type="text/ecmascript">
+        var transMatrix = [1, 0, 0, 1, 0, 0];
+        function clickChild(evt){window.parent.clickChild(evt);}
+        function init(evt) {
+        if (window.svgDocument == null) {
+        svgDoc = evt.target.ownerDocument;
+        }
+        mapMatrix = svgDoc.getElementById(&quot;map-matrix&quot;);
+        clientWidth = svgDoc.documentElement.clientWidth;
+        clientHeight = svgDoc.documentElement.clientHeight;
+        getlayer(svgDoc);
+        addEvent(mapMatrix);
+        width = mapMatrix.firstElementChild.width.animVal.value;
+        height = mapMatrix.firstElementChild.height.animVal.value;
+        transMatrix[0] = 1;
+        transMatrix[3] = 1;
+        transMatrix[4] = -(width/2)+(clientWidth/2);
+        transMatrix[5] = -(height/2)+(clientHeight/2);
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);
+        zoomIn(clientHeight/height);
+        }
+        function addEvent(mapMatrix) {
+        if(document.addEventListener){
+        mapMatrix.addEventListener(&apos;DOMMouseScroll&apos;,mousewheel,false);}
+        mapMatrix.setAttribute(&quot;onmousewheel&quot;, &quot;mousewheel(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmouseup&quot;, &quot;mouseup(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousedown&quot;, &quot;mousedown(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousemove&quot;,&quot;mousemove(evt)&quot;);
+        mapMatrix.setAttribute(&quot;onmousemout&quot;, &quot;mousemout(evt)&quot;);
+        }
+        function mousewheel(evt) {
+        if (evt.wheelDelta) {
+        console.log(evt.wheelDelta);
+        if (evt.wheelDelta == 120) {
+        zoomOut(1.25);
+        }else if(evt.wheelDelta == 180){
+        zoomOut(1.25);
+        } else {
+        zoomIn(0.8);
+        }
+        } else if (evt.detail) {
+        if (evt.detail == -3) {
+        zoomOut(1.25);
+        } else {
+        zoomIn(0.8);}}}
+        var downx = 0;var downy = 0;var downclick = 0;var movex = transMatrix[4];var movey = transMatrix[5];
+        function mouseup(evt) {
+        var oEvent = evt || event;
+        var x = (oEvent.clientX - downx);
+        var y = (oEvent.clientY - downy);
+        movex += x;
+        movey += y;
+        downclick = 0;downx = 0;downy = 0;}
+        function mousemout(evt) {
+        downclick = 0;downx = 0;downy = 0;}
+        function mousedown(evt) {
+        var oEvent = evt || event;
+        downclick = 1;
+        downx = oEvent.clientX;
+        downy = oEvent.clientY;}
+        function mousemove(evt) {
+        if (downclick == 1) {
+        var oEvent = evt || event;
+        var x = (oEvent.clientX - downx);
+        var y = (oEvent.clientY - downy);
+        transMatrix[4] = x + movex;
+        transMatrix[5] = y + movey;
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) +&quot;)&quot;;
+        mapMatrix.setAttributeNS(null,&quot;transform&quot;, newMatrix);}}
+        function getlayer(SvgMainMapDoc) {
+        var node = SvgMainMapDoc.documentElement;
+        findnode(node)}
+        function findnode(node) {
+        for (var i = 0; i &lt; node.childNodes.length; i++) {
+        if (node.childNodes.item(i).nodeType != 3 &amp;&amp; node.childNodes.item(i).nodeType != 4) {
+        var child = node.childNodes.item(i);
+        if (child.getAttribute(&quot;id&quot;) &amp;&amp; child.getAttribute(&quot;objid&quot;) != &quot;&quot; &amp;&amp; child.getAttribute(&quot;objid&quot;) != null) {
+        /*child.setAttribute(&quot;onclick&quot;, &quot;click(this)&quot;); */}
+        if (child.childNodes) {
+        findnode(child);
+        } else {
+        break;
+        }}}}
+        function click(evt) {
+        /*alert(evt.getAttribute(&quot;objid&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objtype&quot;)+&quot;_&quot;+evt.getAttribute(&quot;name&quot;)); */}
+        function move(evt){
+        var id = evt.getAttribute(&quot;objtype&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objid&quot;)
+        var node = svgDoc.documentElement;
+        opacity(node,&quot;1&quot;,id);}
+        function out(evt){
+        var id = evt.getAttribute(&quot;objtype&quot;) + &quot;_&quot; + evt.getAttribute(&quot;objid&quot;)
+        var node = svgDoc.documentElement;
+        opacity(node,&quot;0&quot;,id); }
+        function opacity(node,value,id){
+        for (var i = 0; i &lt; node.childNodes.length; i++) {
+        if (node.childNodes.item(i).nodeType != 3 &amp;&amp; node.childNodes.item(i).nodeType != 4) {
+        var child = node.childNodes.item(i);
+        if (child.getAttribute(&quot;opacity&quot;) &amp;&amp; child.getAttribute(&quot;geoLabel&quot;) != null &amp;&amp;child.getAttribute(&quot;geoLabel&quot;) == id ) {
+        child.setAttribute(&quot;opacity&quot;, value);}
+        if (child.childNodes) {
+        opacity(child,value,id);
+        } else {
+        break;}}}}
+        function pan(dx, dy) {
+        transMatrix[4] += dx;
+        transMatrix[5] += dy;
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos;&apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+        function zoomIn(scale) {
+        console.log(scale);
+        if(transMatrix[0] &lt; 0.02 )
+        return;
+        for (var i = 0; i &lt; transMatrix.length; i++) {
+        transMatrix[i] *= scale;}
+        transMatrix[4] += (1 - scale) * clientWidth / 2;
+        transMatrix[5] += (1 - scale) * clientHeight / 2;
+        movex = transMatrix[4];
+        movey = transMatrix[5];
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+        function zoomOut(scale) {
+        console.log(scale);
+        if(transMatrix[0]&gt;10 ) 
+        return;
+        for (var i = 0; i &lt; transMatrix.length; i++) {
+        transMatrix[i] *= scale;}
+        transMatrix[4] += (1 - scale) * clientWidth / 2;
+        transMatrix[5] += (1 - scale) * clientHeight / 2;
+        movex = transMatrix[4];
+        movey = transMatrix[5];
+        newMatrix = &quot;matrix(&quot; + transMatrix.join(&apos; &apos;) + &quot;)&quot;;
+        mapMatrix.setAttributeNS(null, &quot;transform&quot;, newMatrix);}
+    </script>
+    <defs />
+    <g id="map-matrix" transform="matrix(1 0 0 1 0 0)">
+        <g id="bglayer">
+            <rect width="934" x="0.0" height="860" y="0.0" style="fill:#fff;" />
+        </g>
+        <g id="Substation_Layer">
+            <g id="">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="2" fill="none" points="15.000000, -500.000000 271.000000, -500.000000 271.000000, -560.000000 15.000000, -560.000000 15.000000, -500.000000" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectName="金星辐射闭合线路" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="2" fill="none" points="301.000000, -500.000000 445.000000, -500.000000 445.000000, -560.000000 301.000000, -560.000000 301.000000, -500.000000" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectName="侯河_金星" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="2" fill="none" points="15.000000, 0.000000 263.000000, 0.000000 263.000000, -60.000000 15.000000, -60.000000 15.000000, 0.000000" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectName="金星_礼士" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="2" fill="none" points="295.000000, 0.000000 443.000000, 0.000000 443.000000, -60.000000 295.000000, -60.000000 295.000000, 0.000000" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectName="顶和_金星" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="">
+                <polygon stroke="rgb(255, 255, 0)" stroke-width="2" fill="none" points="475.000000, 0.000000 619.000000, 0.000000 619.000000, -60.000000 475.000000, -60.000000 475.000000, 0.000000" node1="0" node2="0" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectName="东兴_金星" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="113997367362977921">
+                <polygon stroke="rgb(255, 0, 0)" stroke-width="3" fill="none" points="0.000000, -330.000000 634.000000, -330.000000 634.000000, -230.000000 0.000000, -230.000000 0.000000, -330.000000" node1="0" node2="0" _Dataid="113997367362977921" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="113997367362977921" ObjectName="金星变" PSRType="30000000" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_42431">
+                <polygon stroke="rgb(187, 187, 0)" stroke-width="2.5" fill="none" points="67.000000, -500.000000 67.000000, -330.000000" node1="0" node2="0" _Dataid="PD_14000000_42431" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_42431" ObjectName="10KV金鼎166线" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_42432">
+                <polygon stroke="rgb(187, 187, 0)" stroke-width="2.5" fill="none" points="117.000000, -500.000000 117.000000, -330.000000" node1="0" node2="0" _Dataid="PD_14000000_42432" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_42432" ObjectName="10KV金园262线" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_42433">
+                <polygon stroke="rgb(187, 187, 0)" stroke-width="2.5" fill="none" points="167.000000, -500.000000 167.000000, -330.000000" node1="0" node2="0" _Dataid="PD_14000000_42433" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_42433" ObjectName="10KV生农261线" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_42434">
+                <polygon stroke="rgb(187, 187, 0)" stroke-width="2.5" fill="none" points="217.000000, -500.000000 217.000000, -330.000000" node1="0" node2="0" _Dataid="PD_14000000_42434" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_42434" ObjectName="10kV生镇266线" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_42435">
+                <polygon stroke="rgb(187, 187, 0)" stroke-width="2.5" fill="none" points="373.000000, -500.000000 373.000000, -330.000000" node1="0" node2="0" _Dataid="PD_14000000_42435" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_42435" ObjectName="10KV马农268线" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_42436">
+                <polygon stroke="rgb(187, 187, 0)" stroke-width="2.5" fill="none" points="65.000000, -60.000000 65.000000, -230.000000" node1="0" node2="0" _Dataid="PD_14000000_42436" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_42436" ObjectName="10KV生工161线" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_42437">
+                <polygon stroke="rgb(187, 187, 0)" stroke-width="2.5" fill="none" points="115.000000, -60.000000 115.000000, -230.000000" node1="0" node2="0" _Dataid="PD_14000000_42437" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_42437" ObjectName="10kV金工267线" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_42438">
+                <polygon stroke="rgb(187, 187, 0)" stroke-width="2.5" fill="none" points="165.000000, -60.000000 165.000000, -230.000000" node1="0" node2="0" _Dataid="PD_14000000_42438" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_42438" ObjectName="10kV金农167线" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_42439">
+                <polygon stroke="rgb(187, 187, 0)" stroke-width="2.5" fill="none" points="215.000000, -60.000000 215.000000, -230.000000" node1="0" node2="0" _Dataid="PD_14000000_42439" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_42439" ObjectName="10kV思岳264线" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_42440">
+                <polygon stroke="rgb(187, 187, 0)" stroke-width="2.5" fill="none" points="345.000000, -60.000000 345.000000, -230.000000" node1="0" node2="0" _Dataid="PD_14000000_42440" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_42440" ObjectName="10KV金九163线" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_42441">
+                <polygon stroke="rgb(187, 187, 0)" stroke-width="2.5" fill="none" points="395.000000, -60.000000 395.000000, -230.000000" node1="0" node2="0" _Dataid="PD_14000000_42441" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_42441" ObjectName="10KV马工162线" PSRType="null" />
+                </metadata>
+            </g>
+            <g id="PD_14000000_42442">
+                <polygon stroke="rgb(187, 187, 0)" stroke-width="2.5" fill="none" points="547.000000, -60.000000 547.000000, -230.000000" node1="0" node2="0" _Dataid="PD_14000000_42442" />
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                    <cge:PSR_Ref ObjectID="PD_14000000_42442" ObjectName="10KV南宵265线" PSRType="null" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Text_Layer">
+            <g id="1693_501156_0">
+                <text font-size="24" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.8" x="129.499999" y="-523" style="text-anchor:middle">金星辐射闭合线路</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501157_0">
+                <text font-size="24" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.8" x="366.2499995" y="-523" style="text-anchor:middle">侯河_金星</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501158_0">
+                <text font-size="24" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.8" x="132.2499995" y="-23" style="text-anchor:middle">金星_礼士</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501159_0">
+                <text font-size="24" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.8" x="362.2499995" y="-23" style="text-anchor:middle">顶和_金星</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501160_0">
+                <text font-size="24" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.8" x="540.2499995" y="-23" style="text-anchor:middle">东兴_金星</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501161_0">
+                <text font-size="72" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="2.4" x="303.499999" y="-273" style="text-anchor:middle">金星变</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501162_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="91" y="-477.612001" style="text-anchor:middle">10KV</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501162_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="91" y="-463.312001" style="text-anchor:middle">金</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501162_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="91" y="-449.012001" style="text-anchor:middle">鼎</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501162_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="91" y="-434.712001" style="text-anchor:middle">166</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501162_4">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="91" y="-420.412001" style="text-anchor:middle">线</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501163_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="141" y="-477.612001" style="text-anchor:middle">10KV</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501163_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="141" y="-463.312001" style="text-anchor:middle">金</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501163_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="141" y="-449.012001" style="text-anchor:middle">园</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501163_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="141" y="-434.712001" style="text-anchor:middle">262</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501163_4">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="141" y="-420.412001" style="text-anchor:middle">线</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501164_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="191" y="-477.612001" style="text-anchor:middle">10KV</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501164_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="191" y="-463.312001" style="text-anchor:middle">生</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501164_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="191" y="-449.012001" style="text-anchor:middle">农</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501164_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="191" y="-434.712001" style="text-anchor:middle">261</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501164_4">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="191" y="-420.412001" style="text-anchor:middle">线</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501165_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="241" y="-477.612001" style="text-anchor:middle">10kV</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501165_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="241" y="-463.312001" style="text-anchor:middle">生</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501165_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="241" y="-449.012001" style="text-anchor:middle">镇</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501165_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="241" y="-434.712001" style="text-anchor:middle">266</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501165_4">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="241" y="-420.412001" style="text-anchor:middle">线</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501166_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="397" y="-477.612001" style="text-anchor:middle">10KV</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501166_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="397" y="-463.312001" style="text-anchor:middle">马</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501166_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="397" y="-449.012001" style="text-anchor:middle">农</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501166_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="397" y="-434.712001" style="text-anchor:middle">268</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501166_4">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="397" y="-420.412001" style="text-anchor:middle">线</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501167_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="89" y="-207.612001" style="text-anchor:middle">10KV</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501167_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="89" y="-193.312001" style="text-anchor:middle">生</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501167_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="89" y="-179.012001" style="text-anchor:middle">工</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501167_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="89" y="-164.712001" style="text-anchor:middle">161</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501167_4">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="89" y="-150.412001" style="text-anchor:middle">线</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501168_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="139" y="-207.612001" style="text-anchor:middle">10kV</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501168_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="139" y="-193.312001" style="text-anchor:middle">金</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501168_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="139" y="-179.012001" style="text-anchor:middle">工</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501168_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="139" y="-164.712001" style="text-anchor:middle">267</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501168_4">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="139" y="-150.412001" style="text-anchor:middle">线</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501169_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="189" y="-207.612001" style="text-anchor:middle">10kV</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501169_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="189" y="-193.312001" style="text-anchor:middle">金</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501169_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="189" y="-179.012001" style="text-anchor:middle">农</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501169_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="189" y="-164.712001" style="text-anchor:middle">167</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501169_4">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="189" y="-150.412001" style="text-anchor:middle">线</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501170_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="239" y="-207.612001" style="text-anchor:middle">10kV</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501170_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="239" y="-193.312001" style="text-anchor:middle">思</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501170_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="239" y="-179.012001" style="text-anchor:middle">岳</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501170_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="239" y="-164.712001" style="text-anchor:middle">264</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501170_4">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="239" y="-150.412001" style="text-anchor:middle">线</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501171_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="369" y="-207.612001" style="text-anchor:middle">10KV</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501171_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="369" y="-193.312001" style="text-anchor:middle">金</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501171_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="369" y="-179.012001" style="text-anchor:middle">九</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501171_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="369" y="-164.712001" style="text-anchor:middle">163</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501171_4">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="369" y="-150.412001" style="text-anchor:middle">线</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501172_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="419" y="-207.612001" style="text-anchor:middle">10KV</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501172_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="419" y="-193.312001" style="text-anchor:middle">马</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501172_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="419" y="-179.012001" style="text-anchor:middle">工</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501172_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="419" y="-164.712001" style="text-anchor:middle">162</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501172_4">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="419" y="-150.412001" style="text-anchor:middle">线</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501173_0">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="571" y="-207.612001" style="text-anchor:middle">10KV</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501173_1">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="571" y="-193.312001" style="text-anchor:middle">南</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501173_2">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="571" y="-179.012001" style="text-anchor:middle">宵</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501173_3">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="571" y="-164.712001" style="text-anchor:middle">265</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+            <g id="1693_501173_4">
+                <text font-size="13" font-family="SimSun" stroke="rgb(0, 0, 0)" stroke-width="0.4333333333" x="571" y="-150.412001" style="text-anchor:middle">线</text>
+                <metadata>
+                    <cge:Layer_Ref ObjectName="MainLayer" />
+                </metadata>
+            </g>
+        </g>
+        <g id="Hot_Layer" />
+    </g>
+</svg>
