@@ -6,3 +6,60 @@
   bottom: 0;
   background: url("../../assets/images/no-data.png") no-repeat center;
 }
+
+.v-tab-pane {
+  height: calc(100vh - 32px - 64px - 80px);
+}
+
+.btn-height {
+  line-height: 26px;
+
+  &+.btn-height {
+    margin-left: 8px;
+  }
+
+  &.ant-btn-success {
+    background-color: #36a18d;
+    border-color: #36a18d;
+    color: #fff;
+
+    &:hover {
+      background-color: lighten(#36a18d, 10);
+    }
+  }
+
+  &.ant-btn-disabled,
+  &.ant-btn.disabled,
+  &.ant-btn[disabled],
+  &.ant-btn-disabled:hover,
+  &.ant-btn.disabled:hover,
+  &.ant-btn[disabled]:hover,
+  &.ant-btn-disabled:focus,
+  &.ant-btn.disabled:focus,
+  &.ant-btn[disabled]:focus,
+  &.ant-btn-disabled:active,
+  &.ant-btn.disabled:active,
+  &.ant-btn[disabled]:active,
+  &.ant-btn-disabled.active,
+  &.ant-btn.disabled.active,
+  &.ant-btn[disabled].active,
+  .ant-btn-disabled,
+  .ant-btn.disabled,
+  .ant-btn[disabled],
+  .ant-btn-disabled:hover,
+  .ant-btn.disabled:hover,
+  .ant-btn[disabled]:hover,
+  .ant-btn-disabled:focus,
+  .ant-btn.disabled:focus,
+  .ant-btn[disabled]:focus,
+  .ant-btn-disabled:active,
+  .ant-btn.disabled:active,
+  .ant-btn[disabled]:active,
+  .ant-btn-disabled.active,
+  .ant-btn.disabled.active,
+  .ant-btn[disabled].active {
+    background-color: rgba(0, 0, 0, .4) !important;
+    color: #bbb !important;
+    border-color: rgba(0, 0, 0, .5) !important;
+  }
+}

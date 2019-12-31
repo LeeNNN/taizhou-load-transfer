@@ -8,8 +8,10 @@ const {
 
 const path = require("path")
 
-// setWebpackPublicPath("/occa_analysis/"),
+const publicPath = process.env.NODE_ENV === "production" ? "/occa_analysis/" : "/"
+
 module.exports = override(
+  setWebpackPublicPath(publicPath),
   fixBabelImports("import", {
     libraryName: "antd",
     libraryDirectory: "es",

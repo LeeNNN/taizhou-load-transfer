@@ -21,6 +21,7 @@ const options = {
     formatter({
       data: { name = "", type = 1, feederName = null, isOutsideDevice = false, isRepeatDevice = false }
     }) {
+      if (type === 0) return `起始点：${feederName}`
       let title = isOutsideDevice
         ? `${types[type]}(外部设备)`
         : isRepeatDevice
@@ -37,6 +38,9 @@ const options = {
     bottom: "5%",
     right: "5%",
     symbol: (value, { data }) => {
+      // 初始节点 或者 外部线路接地那
+      if (data.start || data.type % 1000 === 7) return "rect"
+
       const { isRepeatDevice, isOutsideDevice } = data
       let type = data.newType || data.TYPE || data.type || "emptyCircle"
       if (isOutsideDevice) {
@@ -47,13 +51,12 @@ const options = {
       return symbolTypes[type]
     },
     roam: true,
-    symbolSize: 28,
+    symbolSize: (value, { data }) => (data.start ? [48, 36] : 20),
     initialTreeDepth: -1,
     width: 2000,
-    expandAndCollapse: false,
     label: {
       normal: {
-        show: true,
+        show: false,
         position: "bottom",
         verticalAlign: "middle",
         formatter: "{b}",
@@ -66,7 +69,7 @@ const options = {
     leaves: {
       label: {
         normal: {
-          show: true,
+          show: false,
           position: "right",
           verticalAlign: "middle",
           rotate: 0,
@@ -75,7 +78,12 @@ const options = {
         }
       }
     },
-    animationDurationUpdate: 750
+    animationDurationUpdate: 750,
+    itemStyle: {
+      color: "#172341",
+      borderColor: "#53f8ea",
+      borderWidth: 3
+    }
   }
 }
 let myCharts = null
@@ -102,8 +110,7 @@ export default props => {
   const refCharts = useRef()
   const data = props.data
   const [list, setList] = useState([])
-  const { depth, handleLoading, type } = props
-  // console.log("=====", props)
+  const { depth, handleLoading } = props
   useEffect(() => {
     if (isDiffObject(list, data)) {
       setList(data)
@@ -112,13 +119,10 @@ export default props => {
     options.series.data = data
     options.series.width = depth * 72
     // console.log(options.series)
-    options.series.symbolSize = type === "simpleTopo" ? 28 : 20
-    options.series.label.normal.show = type === "simpleTopo"
-    options.series.leaves.label.normal.show = type === "simpleTopo"
     if (!myCharts) myCharts = echarts.init(refCharts.current, null, { renderer: "svg" })
     myCharts.clear()
     myCharts.setOption({ ...options }, true, false)
-    myCharts.resize()
+    // myCharts.resize()
     // myCharts.on("click", function (params) {
     //   // data[0].type = 2
     //   // options.series.data = data
@@ -137,7 +141,7 @@ export default props => {
       myCharts.clear()
       myCharts = null
     }
-  }, [data, list, depth, handleLoading, type])
+  }, [data, list, depth, handleLoading])
 
-  return <div className="echarts" ref={refCharts} style={{ height: "calc(100% - 132px)" }} />
+  return <div className="echarts" ref={refCharts} style={{ height: "calc(100% - 40px)" }} />
 }

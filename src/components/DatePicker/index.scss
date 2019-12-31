@@ -1,0 +1,19 @@
+@import "../../assets/scss/variable";
+
+.form-date {
+  .ant-input {
+    background-color: rgba($text-color, 0.08);
+    color: $text-color;
+    border-color: rgba($text-color, 0.08);
+  }
+
+  .ant-calendar-picker-icon {
+    color: rgba($text-color, 0.8);
+  }
+
+}
+
+// .ant-calendar {
+//   background-color: rgba($primary-color, 0.75) !important;
+//   color: $text-color;
+// }

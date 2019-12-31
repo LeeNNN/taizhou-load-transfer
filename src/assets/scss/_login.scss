@@ -21,6 +21,12 @@
     color: #fff;
     text-shadow: 0 3px 12px#000;
     margin-bottom: 1em;
+    white-space: nowrap;
+    transform: translateX(-64px);
+    -webkit-transform: translateX(-64px);
+    -moz-transform: translateX(-64px);
+    -ms-transform: translateX(-64px);
+    -o-transform: translateX(-64px);
   }
 }
 

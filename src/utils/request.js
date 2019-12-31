@@ -1,7 +1,17 @@
 import axios from "axios"
 import { message } from "antd"
+
+message.config({
+  top: 66,
+  duration: 2
+})
+
+const CancelToken = axios.CancelToken
+export let source = CancelToken.source()
+
 const service = axios.create({
-  baseURL: "/" + process.env.REACT_APP_BASEURL
+  baseURL: "/" + process.env.REACT_APP_BASEURL,
+  timeout: 8000
   // baseURL: "/api"
 })
 
@@ -29,12 +39,17 @@ service.interceptors.response.use(data => {
 
 const request = (url, method = "GET", data = {}, headers = null) => {
   return new Promise((resolve, reject) => {
-    service({
-      url,
-      method: method.toUpperCase(),
-      data,
-      headers
-    }).then(res => {
+    service(
+      {
+        url,
+        method: method.toUpperCase(),
+        data,
+        headers
+      },
+      {
+        cancelToken: source.token
+      }
+    ).then(res => {
       if (url.indexOf(".svg") > -1) {
         return resolve(res)
       }

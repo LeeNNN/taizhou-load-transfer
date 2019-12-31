@@ -1,0 +1,34 @@
+@import "../../assets/scss/variable";
+
+.drawer {
+  color: $text-color;
+
+  .ant-drawer-content {
+    background-color: $primary-color;
+  }
+
+  .ant-drawer-title,
+  .ant-drawer-close {
+    color: inherit;
+  }
+
+  .ant-table-thead>tr>th {
+    background-color: darken($primary-color, 3);
+    color: $text-color;
+  }
+
+  .ant-table-thead>tr,
+  .ant-table-tbody>tr {
+    td {
+      color: rgba($text-color, 0.5);
+    }
+
+    &:hover td {
+      background-color: lighten($color: $primary-color, $amount: 5) !important;
+    }
+  }
+
+  .ant-table-small>.ant-table-content>.ant-table-body {
+    margin: 0;
+  }
+}

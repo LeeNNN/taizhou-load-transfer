@@ -27,7 +27,7 @@ class Secondary extends Component {
       sessionStorage.setItem("user", "user")
       this.setState({ loading: false })
       // 重定向到用户期望的页面，用户在地址栏输入的地址
-      const redirect = this.props.history.location.search.split("=")[1] || "/load"
+      const redirect = this.props.history.location.search.split("=")[1] || "/topology"
       this.props.history.push(redirect)
     })
   }
@@ -60,7 +60,7 @@ class Secondary extends Component {
     return (
       <div className="login">
         <div className="login-form">
-          <h3>泰州负荷转供系统</h3>
+          <h3>泰州配网负荷转供分析系统</h3>
           <Spin spinning={loading}>
             <div className="form">
               <Form colon={false} hideRequiredMark onSubmit={this.handleSubmit}>
@@ -77,7 +77,7 @@ class Secondary extends Component {
                   {getFieldDecorator("password", {
                     rules: [
                       { required: true, message: "密码不能为空" },
-                      { pattern: patternPassword, message: "至少包含 数字和英文，长度6到20位" }
+                      { pattern: patternPassword, message: "长度6到20位的数字字母" }
                     ]
                   })(<Input.Password placeholder="请输入用户名" autoComplete="off" size="large" />)}
                 </Form.Item>

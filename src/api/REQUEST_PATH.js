@@ -11,3 +11,5 @@ export const CONFESSION_ANALYSIS = "/analysis/analysis"
 // export const DO_LOGIN = "/login.do"
 // export const USER_KEY = "/getKey.do"
 // export const GET_TREE_DATA = "/select/areaNav.do"
+
+export const CONFESSION_ANALYSIS_ALL = "/analysis/analsisAll"

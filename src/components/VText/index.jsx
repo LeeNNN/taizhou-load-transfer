@@ -3,8 +3,12 @@ import PropTypes from "prop-types"
 import "./index.scss"
 
 const VText = props => {
-  const { children } = props
-  return <span className="v-text">{children}</span>
+  const { children, type, className } = props
+  return (
+    <span className={`v-text ${className}`} type={type}>
+      {children}
+    </span>
+  )
 }
 
 VText.propTypes = {

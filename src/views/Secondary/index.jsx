@@ -3,9 +3,12 @@ import { Card, Typography, Popover, Spin, Modal, message, Button } from "antd"
 import * as d3 from "d3"
 import PopoverModal from "./PopoverModal"
 import Container from "@/components/Container"
+import DrawerAnalysis from "../ConfessionAnalysis/Drawer"
 import * as SVGConfig from "@/utils/svgConfig"
 import { getSvg, confessionAnalysis } from "@/api/svg"
+import { source } from "@/utils/request"
 import "./index.scss"
+
 const { confirm } = Modal
 const { Text } = Typography
 
@@ -141,38 +144,53 @@ export default class Secondary extends Component {
   getSvg = lineId => {
     this.setState({ spinning: true, loading: false })
     const _this = this
-    getSvg(lineId).then(res => {
-      if (!res.svgUrl) {
-        this.setState({ spinning: false, svgHtml: null })
-        this.refSvg.innerHTML = null
-        message.destroy()
-        return message.error("未获取到图模资源")
-      }
-      SVGConfig.loadSvg(
-        "#svgapp",
-        {
-          svgUrl: window.location.origin + "/OCCA_web" + res.svgUrl
-        },
-        [{ id: res.sourceId, isPower: true, default: false }],
-        error => {
-          // SVGConfig.loadSvg("#svgapp", { svgUrl: "http://localhost:3000/resources/3.svg" }, [{ id: "pd_1111111", isPower: true, default: false }], (error) => {
-          if (error) {
-            _this.setState({ svgHtml: null })
-            this.refSvg.innerHTML = null
-            message.destroy()
-            message.error("未获取到图模资源")
-          } else {
-            _this.setState({ svgHtml: true })
-            this.searchDeviceList = []
-            for (let key in SVGConfig.svgConfig.configs.devices) {
-              const device = SVGConfig.svgConfig.configs.devices[key]
-              this.searchDeviceList.push(device)
-            }
-          }
-          _this.setState({ spinning: false })
+    getSvg(lineId)
+      .then(res => {
+        if (!res.svgUrl) {
+          this.setState({ spinning: false, svgHtml: null })
+          this.refSvg.innerHTML = null
+          message.destroy()
+          return message.error("未获取到图模资源")
         }
-      )
-    })
+        const svgUrl =
+          process.env.NODE_ENV === "development" ? "http://192.168.2.187:8080" : window.location.origin
+
+        SVGConfig.loadSvg(
+          "#svgapp",
+          {
+            svgUrl: svgUrl + "/OCCA_web" + res.svgUrl
+          },
+          [{ id: res.sourceId, isPower: true, default: false }],
+          error => {
+            // SVGConfig.loadSvg("#svgapp", { svgUrl: "http://localhost:3000/resources/3.svg" }, [{ id: "pd_1111111", isPower: true, default: false }], (error) => {
+            if (error) {
+              _this.setState({ svgHtml: null })
+              this.refSvg.innerHTML = null
+              message.destroy()
+              message.error("未获取到图模资源")
+            } else {
+              _this.setState({ svgHtml: true })
+              this.searchDeviceList = []
+              for (let key in SVGConfig.svgConfig.configs.devices) {
+                const device = SVGConfig.svgConfig.configs.devices[key]
+                this.searchDeviceList.push(device)
+              }
+            }
+            _this.setState({ spinning: false })
+          }
+        )
+      })
+      .catch(_err => {
+        this.setState({ spinning: false, svgHtml: null })
+      })
+  }
+  // 区间转供分析
+  handleAnalysis = () => {
+    this.setState({ visible: true })
+  }
+  // 关闭抽屉
+  handleDrawerClose = () => {
+    this.setState({ visible: false })
   }
 
   componentDidMount() {
@@ -196,13 +214,18 @@ export default class Secondary extends Component {
     }
   }
 
+  componentWillUnmount() {
+    source.cancel()
+  }
+
   render() {
     const {
       spinning = false,
       svgHtml,
       analysis: { errors, results },
       loading = false,
-      deviceIds
+      deviceIds,
+      visible
     } = this.state
     return (
       <Spin spinning={spinning}>
@@ -222,7 +245,16 @@ export default class Secondary extends Component {
                   <Button className="btn-height" type="primary" onClick={this.handleAnalogPowerOutage}>
                     停电模拟
                   </Button>
-                  <Popover
+                  <Button
+                    className="btn-height"
+                    type="success"
+                    loading={loading}
+                    disabled={!deviceIds.length}
+                    onClick={this.handleAnalysis}
+                  >
+                    转供分析
+                  </Button>
+                  {/* <Popover
                     overlayClassName="analysis"
                     content={
                       <PopoverModal
@@ -245,7 +277,7 @@ export default class Secondary extends Component {
                     >
                       转供分析
                     </Button>
-                  </Popover>
+                  </Popover> */}
                   <Text
                     style={{
                       fontSize: 12,
@@ -263,11 +295,12 @@ export default class Secondary extends Component {
             }
             bordered={false}
             style={{ background: "#172341", flex: 1 }}
-            bodyStyle={{ height: "calc(100vh - 162px)" }}
+            bodyStyle={{ height: "calc(100vh - 162px)", overflow: "hidden" }}
             className="v-card"
           >
             {!svgHtml && <div className="no-data" />}
             <div id="svgapp" ref={node => (this.refSvg = node)} />
+            <DrawerAnalysis visible={visible} onDrawClose={this.handleDrawerClose} />
           </Card>
         </Container>
       </Spin>

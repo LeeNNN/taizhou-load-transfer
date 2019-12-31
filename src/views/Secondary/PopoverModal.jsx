@@ -5,7 +5,7 @@ import DlHorizontal from "@/components/DlHorizontal"
 import "./popover.scss"
 const { Text } = Typography
 export default props => {
-  console.log("查找断开的开关", props)
+  // console.log("查找断开的开关", props)
   const { results = [], errors = [], devicesName = [] } = props
   return (
     <div className="pop-analysis" style={{ width: results.length > 3 ? 640 : 380 }}>

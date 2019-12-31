@@ -67,6 +67,12 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
 
+## 修改 echarts 源码，曲线图改为折线图 只修改简图的折线形式 维护两分 echarts 包
 
-#####  "proxy": "http://192.168.2.195:8080/"
+node_modules/echarts2/lib/chart/tree/TreeView.js
+
+替换为 ./TreeView.js
+
+##### "proxy": "http://192.168.2.195:8080/"
+
 ##### "proxy": "http://192.168.2.40:18800/"
