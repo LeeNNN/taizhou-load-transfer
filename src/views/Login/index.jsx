@@ -79,7 +79,7 @@ class Secondary extends Component {
                       { required: true, message: "密码不能为空" },
                       { pattern: patternPassword, message: "长度6到20位的数字字母" }
                     ]
-                  })(<Input.Password placeholder="请输入用户名" autoComplete="off" size="large" />)}
+                  })(<Input.Password placeholder="请输入密码" autoComplete="off" size="large" />)}
                 </Form.Item>
                 <Form.Item>
                   {getFieldDecorator("remember", {

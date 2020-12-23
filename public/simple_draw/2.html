@@ -1,0 +1,23 @@
+<script src="./jquery-1.12.0.min.js"></script>
+<script src="./data.js"></script>
+<script type="text/javascript">
+    $(function () {
+        var json = data.result.topo.topology;
+        //colspan记录节点的所有叶子节点个数
+        function getLeafCountTree(json) {
+            if (json.children == null || json.children.length == 0) {
+                json.colspan = 1;
+                return 1;
+            } else {
+                var leafCount = 0;
+                for (var i = 0; i < json.children.length; i++) {
+                    leafCount = leafCount + getLeafCountTree(json.children[i]);
+                }
+                json.colspan = leafCount;
+                return leafCount;
+            }
+        }
+        getLeafCountTree(json);
+        alert(json.colspan);
+    });
+</script>

@@ -4,12 +4,16 @@ import { DatePicker, Form, Button } from "antd"
 import moment from "moment"
 import "moment/locale/zh-cn"
 import "./index.scss"
+// const {RangePicker} = DatePicker
 moment.locale("zh-cn")
 
 // 初始化日期的时间为当天24点
-const initialDate = new Date()
-initialDate.setHours(24, 0, 0)
-
+// const initialDate = new Date()
+// initialDate.setHours(24, 0, 0)
+const initialDate = moment()
+const initialEndDate = moment(initialDate).subtract(1, "days")
+const initialStartDate = moment(initialDate).subtract(8, "days") //, moment(startDate).add(7, "days").valueOf()
+// console.log("monent", initialDate, initialStartDate, initialEndDate)
 // 缓存转供分析选择的日期范围
 let oldValue = {}
 let oldLineId = null
@@ -22,9 +26,9 @@ const DatePickerCustom = props => {
   // console.log("===", props)
   const { getFieldDecorator, setFieldsValue, validateFields } = form
 
-  const [startDate, setStartDate] = useState(null)
-  const [endDate, setEndDate] = useState(initialDate)
-
+  const [startDate, setStartDate] = useState(initialStartDate)
+  const [endDate, setEndDate] = useState(initialEndDate)
+  const [defaultEndDate, setDefaultEndDate] = useState(initialEndDate)
   // 起始日期进行选择操作
   const onChangeStartDate = useCallback(
     (date, dateString) => {
@@ -32,6 +36,7 @@ const DatePickerCustom = props => {
       setFieldsValue({
         endDate: null
       })
+      // console.log("defaultEndDate", startDate, endDate,defaultEndDate)
       // console.log("endDateRef.current:", endDateRef)
       // endDateRef.current.focus()
     },
@@ -55,36 +60,58 @@ const DatePickerCustom = props => {
   // 设置起始日期不可用范围
   const disabledStartDate = useCallback(
     startValue => {
-      if (!startValue || !endDate) {
+      if (!startValue) {
         return false
       }
-      return startValue.valueOf() > endDate
+      return startValue > initialDate
     },
-    [endDate]
+    []
   )
 
   // 设置结束日期不可用范围
   const disabledEndDate = useCallback(
     endValue => {
+      // console.log("startDate", endValue, startDate)
       if (!endValue || !startDate) {
-        return false
+        // return endValue.valueOf() > Date.now()
+        return endValue > initialDate
       }
       return (
-        endValue.valueOf() <= startDate ||
-        endValue.valueOf() > startDate + 7 * 24 * 60 * 60 * 1000 ||
-        endValue.valueOf() > Date.now()
+        endValue < startDate ||
+        endValue > initialDate||
+        endValue > moment(startDate).add(7, "day")
+        // endValue.valueOf() <= startDate ||
+        // endValue.valueOf() > startDate + 7 * 24 * 60 * 60 * 1000 ||
+        // endValue.valueOf() > Date.now()
       )
     },
     [startDate]
   )
 
   useEffect(() => {
-    return () => {
-      setStartDate(null)
+    if (!startDate) {
       setEndDate(initialDate)
+    } else {
+      // setEndDate(moment(startDate).add(7, "days").valueOf())
+      // setDefaultEndDate(moment(startDate).add(7, "days"))
+      setEndDate(moment(startDate).add(7, "days"))
+      setDefaultEndDate(moment(startDate).add(7, "days"))
+    }
+  }, [startDate])
+
+  useEffect(() => {
+    return () => {
+      // setStartDate(null)
+      // setEndDate(initialDate)
+      // setFieldsValue({
+      //   startDate: null,
+      //   endDate: null
+      // })
+      setStartDate(initialStartDate)
+      setEndDate(initialEndDate)
       setFieldsValue({
-        startDate: null,
-        endDate: null
+        startDate: initialStartDate,
+        endDate: initialEndDate
       })
     }
   }, [drawerVisible, setFieldsValue])
@@ -93,29 +120,40 @@ const DatePickerCustom = props => {
     <Form layout="inline" onSubmit={handleSubmit} className="form-date">
       <Form.Item>
         {getFieldDecorator("startDate", {
-          rules: [{ required: true, message: "起始日期不能为空！" }]
+          rules: [{ required: true, message: "起始日期不能为空！" }],
+          initialValue: initialStartDate
         })(
           <DatePicker
             onChange={onChangeStartDate}
             placeholder="请选择日期"
             disabledDate={disabledStartDate}
             allowClear={false}
+            format={"YYYY-MM-DD"}
             mode="date"
           />
         )}
       </Form.Item>
       <Form.Item>
         {getFieldDecorator("endDate", {
-          rules: [{ required: true, message: "结束日期不能为空" }]
+          rules: [{ required: true, message: "结束日期不能为空" }],
+          initialValue: initialEndDate
         })(
           <DatePicker
             placeholder="请选择日期"
             disabledDate={disabledEndDate}
+            defaultPickerValue={defaultEndDate}
             allowClear={false}
             ref={endDateRef}
           />
         )}
       </Form.Item>
+      {/* <Form.Item>
+        {getFieldDecorator("value", {
+          rules: [{ required: true, message: "日期不能为空" }]
+        })(
+          <RangePicker disabledDate={disabledDate} />
+        )}
+      </Form.Item> */}
       <Form.Item>
         <Button type="primary" htmlType="submit">
           确定

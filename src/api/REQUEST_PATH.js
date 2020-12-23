@@ -13,3 +13,5 @@ export const CONFESSION_ANALYSIS = "/analysis/analysis"
 // export const GET_TREE_DATA = "/select/areaNav.do"
 
 export const CONFESSION_ANALYSIS_ALL = "/analysis/analsisAll"
+// 设置线路无效
+export const LINE_INVALID = "/model/setNullForLine"

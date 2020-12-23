@@ -1,0 +1,76 @@
+<html>
+
+<head>
+    <title>数据简图</title>
+    <script src="./jquery-1.12.0.min.js"></script>
+    <script src="./jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="./jquery-ui.min.css">
+    <script src="./jquery.mousewheel.min.js"></script>
+    <script src="./simple_draw.js"></script>
+    <link rel="stylesheet" href="./simple_draw.css">
+    <!-- <script src="./data.js"></script> -->
+    <script>
+        window.addEventListener('mousewheel', this.wheelEvent, { passive: false })
+    </script>
+</head>
+
+<body>
+    <div class="kdiv"></div>
+</body>
+<script>
+    var option = {
+        open_busbar_breaker_merge: true, //开启母线后开关合并
+        render_combine: true,  //开启渲染环网
+        open_combine_beautify: true,  //开启环网柜美化模式（绝对高宽比例）
+        open_outside_feeder_render:false  //开启对端线路不同方式渲染
+    }
+    $(function () {
+        //初始化数据
+        // draw1.init($(".kdiv"), data.result.topo, option);
+
+        // 拖拽事件
+        $(".kdiv").draggable({
+            scroll: false,
+            cursor: "crosshair",
+            tolerance: "fit"
+        }); //设置drag1只能在containment-wrapper中拖动
+        //缩放事件
+        $(".kdiv").mousewheel(function (event) {
+            handle(event.deltaY, event);
+        });
+
+    });
+    var scales = 1;
+    //上下滚动时的具体处理函数
+    function handle(delta, event) {
+        if (delta == -1 && scales < 0.2) {
+            return;
+        }
+        scales += delta / 30;
+        $(document.body).css("-webkit-transform", "scale(" + scales + ")");
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+    }
+    window.addEventListener('message',  (e) => {
+        draw1.init($(".kdiv"), JSON.parse(e.data), option);
+        $(document.body).css("-webkit-transform", "scale(" + 0.21 + ")");
+        const kW = $(".kdiv").width()
+        const kH = $(".kdiv").height()
+        const CW = document.documentElement.clientWidth
+        const CH = document.documentElement.clientHeight
+        const pw = CW / kW
+        const ph = CH / kH
+        const radio = Math.min(pw, ph, 1)
+        $(document.body).css("-webkit-transform", `scale( ${radio} )`);
+        if (radio < 1) {
+            scales = radio
+            $(".kdiv").offset({"left": -kW * (1- radio) / 2.0, top: -kH * (1- radio) / 2.0})
+            // $(".kdiv").left(-kW * (1- radio) / 2.0+'px')
+            // $(".kdiv").top(-kH * (1- radio) / 2.0+'px')
+        }
+        // console.log($(".kdiv").width(), $(".kdiv").height(), document.documentElement.clientWidth, document.documentElement.clientHeight)
+    });
+</script>
+
+</html>

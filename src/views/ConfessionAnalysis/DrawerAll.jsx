@@ -3,21 +3,30 @@ import PropTypes from "prop-types"
 import { Drawer, Table, Typography } from "antd"
 import DatePicker from "@/components/DatePicker"
 import VTitle from "@/components/VTitle"
-import Descriptions from "@/components/Descriptions"
+// import Descriptions from "@/components/Descriptions"
+import CurrentLine from "./CurrentLine"
 import Loading from "@/components/Loading"
 import { analysisLineConfession } from "@/api/common"
 import "./index.scss"
+import moment from "moment"
+import "moment/locale/zh-cn"
+moment.locale("zh-cn")
 
 const { Column } = Table
 const { Text } = Typography
+const initialDate = moment().format("YYYY-MM-DD")
+const initialEndDate = moment(initialDate).subtract(1, "days").format("YYYY-MM-DD")
+const initialStartDate = moment(initialDate).subtract(8, "days").format("YYYY-MM-DD")
+const currentTableData = {}
 
 const DrawerAll = props => {
   const { visible, onDrawClose, lineId } = props
 
   const [loading, setLoading] = useState(false)
   const [list, setList] = useState([])
-
   const [tableData, setTableData] = useState([])
+  const [startDate, setStartDate] = useState(initialStartDate)
+  const [endDate, setEndDate] = useState(initialEndDate)
 
   const [tip, setTip] = useState("")
 
@@ -27,41 +36,51 @@ const DrawerAll = props => {
 
   const onSubmit = useCallback(
     ({ startDate, endDate }) => {
-      // console.log(startDate, endDate)
+      setStartDate(startDate)
+      setEndDate(endDate)
+      console.log(lineId, tableData, startDate, endDate )
+    },
+    [lineId, tableData]
+  )
+
+  useEffect(() => {
+    console.log("lineId", props.lineId)
+    if (visible && props.lineId && startDate && endDate ) {
+      console.log("lineId", props.lineId, startDate, endDate, currentTableData)
+      const data = currentTableData[`${props.lineId}${startDate}${endDate}`]
+      if (data) {
+        setTableData(data)
+        return
+      }
       setLoading(true)
-      analysisLineConfession(lineId, startDate, endDate)
-        .then(res => {
-          // console.log(res)
+      analysisLineConfession(props.lineId, startDate, endDate)
+        .then((res, err) => {
           const { currentLines, zgfas, errorMsg } = res
           if (currentLines && currentLines.length) {
-            const list = currentLines.map(item => {
-              return {
-                name: item.date,
-                value: item.maxCur + "A" || 0
-              }
-            })
-            setList(list)
+            setList(currentLines || [])
           }
           if (zgfas && zgfas.length) {
             const tableData = zgfas.map(item => {
               return {
                 ...item,
-                id: Math.random()
-                  .toString(16)
-                  .slice(2, 12)
+                id: Math.random().toString(16).slice(2, 12)
               }
             })
+            currentTableData[`${props.lineId}${startDate}${endDate}`] = tableData
             setTableData(tableData)
+            if (!tableData || !tableData.length) setTip("未查询到转供方案！")
           }
-          // console.log("errorm", errorMsg)
-          if (!tableData || !tableData.length) setTip("未查询到转供方案！")
           if (errorMsg) setTip(errorMsg)
         })
-        .catch(_err => setLoading(false))
-        .finally(() => setLoading(false))
-    },
-    [lineId, tableData]
-  )
+        .catch(_err => {
+          setLoading(false)
+        })
+        .finally(() => {
+          setLoading(false)
+        })
+    }
+    return () => {}
+  }, [visible, props.lineId, startDate, endDate])
 
   useEffect(() => {
     return () => {
@@ -86,11 +105,19 @@ const DrawerAll = props => {
       drawerStyle={{ background: "none" }}
       headerStyle={{ background: "none", borderBottom: "solid 1px rgba(0,0,0,0.6)", color: "#fff" }}
     >
-      {loading ? <Loading /> : null}
+      {loading ? <Loading /> : ""}
       <VTitle>请选择线路负荷参考模型时间区间</VTitle>
       <DatePicker onSubmit={onSubmit} lineId={lineId} drawerVisible={visible} />
       <VTitle style={{ marginTop: 24 }}>参考模型时间区间最大电流</VTitle>
-      <Descriptions list={list} />
+      {/* <Descriptions list={list} /> */}
+      {/* [ 
+            { "date": "2019-07-28", "maxCur": 66.09 },
+            { "date": "2019-07-29", "maxCur": 47.11 },
+            { "date": "2019-07-30", "maxCur": 55.02 }
+          ] */}
+      <CurrentLine data={
+        list
+      } />
       <VTitle style={{ marginTop: 24, marginBottom: 20 }}>转供方案建议</VTitle>
       {tableData.length ? (
         <Table dataSource={tableData} pagination={{ hideOnSinglePage: true }} bordered size="small" rowKey="id">
@@ -104,7 +131,15 @@ const DrawerAll = props => {
             />
           ) : null}
           <Column title="转供线路" dataIndex="otherLineName" key="otherLineName" />
-          <Column title="开关操作" dataIndex="concatCbName" key="concatCbName" />
+          <Column title="开关操作" dataIndex="concatCbName" key="concatCbName"
+            render={(text) => {
+              let arr = text.split(";")
+              arr = arr.splice(0, arr.length - 1)
+              return (
+                arr.map((txt, index) => (<div key={index}>{`${index + 1}、${txt};`}</div>))
+              )
+            }}
+          />
           <Column
             title="转供后最大电流"
             dataIndex="restMaxCur"
@@ -122,10 +157,10 @@ const DrawerAll = props => {
           />
         </Table>
       ) : (
-        <Text type="secondary" style={{ color: "rgba(255,255,255, 0.6)" }}>
-          {tip}
-        </Text>
-      )}
+          <Text type="secondary" style={{ color: "rgba(255,255,255, 0.6)" }}>
+            {tip}
+          </Text>
+        )}
     </Drawer>
   )
 }

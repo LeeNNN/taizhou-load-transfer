@@ -74,9 +74,9 @@ const ConfessionAnalysis = props => {
       visible={visible}
       onVisibleChange={handleVisibleChange}
     >
-      <Button className="btn-height" type="success" loading={loading} disabled={disabled}>
+      /* <Button className="btn-height" type="success" loading={loading} disabled={disabled}>
         转供分析
-      </Button>
+      </Button> */
     </Popover>
   )
 }

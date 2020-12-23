@@ -2,7 +2,7 @@ import React, { Component } from "react"
 import { Switch, Route } from "react-router-dom"
 import { Layout, Spin } from "antd"
 import TopHeader from "@/components/TopHeader"
-import TreeNav from "@/components/Tree"
+import TreeNav from "@/components/Tree/Tree"
 import NotFound from "@/views/404"
 import loadable from "@loadable/component"
 import { getTreeData } from "@/api/common"
@@ -15,7 +15,7 @@ const { Sider, Content } = Layout
 
 class Layouts extends Component {
   state = {
-    tree: null,
+    tree: [],
     loading: false,
     treeNode: {}
   }
@@ -37,7 +37,26 @@ class Layouts extends Component {
   handleTreeNodeClick = (node, val) => {
     this.setState({ treeNode: { ...val } })
   }
-
+  changeVisibleInvalid=(invalid) => {
+    console.log("invalid", invalid)
+    const {treeNode} = this.state
+    this.setState({ treeNode: { ...treeNode, invalid: true } }, () => {
+      console.log("invalid state", this.state.treeNode)
+    })
+    const treeList = this.flatTree(this.state.tree)
+    const node = treeList.find(el => el.id === this.state.treeNode.id)
+    node.invalid = true
+  }
+  flatTree(arr) {
+    const result = arr.reduce((arr1, el) => {
+      arr1.push(el)
+      if (el.children) {
+        arr1.push(...this.flatTree(el.children))
+      }
+      return arr1
+    }, [])
+    return result
+  }
   componentDidMount() {
     this.getTreeData()
   }
@@ -59,10 +78,10 @@ class Layouts extends Component {
           <Content style={{ padding: 16 }}>
             <Switch>
               <Route path="/load">
-                <Secondary currentNode={treeNode} />
+                <Secondary currentNode={treeNode} changeVisibleInvalid={this.changeVisibleInvalid}/>
               </Route>
               <Route path="/topology">
-                <Load currentNode={treeNode} />
+                <Load currentNode={treeNode} changeVisibleInvalid={this.changeVisibleInvalid} />
               </Route>
               <Route path="/*" component={NotFound} />
             </Switch>

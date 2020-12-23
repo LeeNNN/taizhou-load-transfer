@@ -6,8 +6,11 @@ import Container from "@/components/Container"
 import DrawerAnalysis from "../ConfessionAnalysis/Drawer"
 import * as SVGConfig from "@/utils/svgConfig"
 import { getSvg, confessionAnalysis } from "@/api/svg"
+import { setLineInvalid, getExportTrData, exportTrData } from "@/api/common"
 import { source } from "@/utils/request"
 import "./index.scss"
+import LineNoData from "@/components/LineNoData"
+import OutlineTabel from "./OutlineTabel"
 
 const { confirm } = Modal
 const { Text } = Typography
@@ -15,12 +18,20 @@ const { Text } = Typography
 export default class Secondary extends Component {
   state = {
     lineId: "",
+    lineName: "",
+    lineInvalidReason: "",
+    lineInvalid: false,
+    resultCode: "1",
+    visibleInvalid: false,
     deviceIds: [],
     visible: false,
     spinning: false,
     svgHtml: null,
     analysis: { errors: [], results: [] },
-    loading: false
+    loading: false,
+    outLineResult: [], //停电的相关id数据
+    outlineVisible: false,
+    outlineData: [] //停电结果
   }
 
   refSvg = createRef()
@@ -128,6 +139,16 @@ export default class Secondary extends Component {
           onOk() {
             _this.setState({ deviceIds })
             SVGConfig.outUpdateCutLine(deviceId, statue)
+            var keys = []
+            // 所有停电的ID
+            for (var key in SVGConfig.svgConfig.off_device_run_paths) {
+              keys = keys.concat(
+                Object.keys(SVGConfig.svgConfig.off_device_run_paths[key])
+              )
+            }
+            _this.setState({
+              outLineResult: keys
+            })
           }
         })
       }
@@ -139,6 +160,9 @@ export default class Secondary extends Component {
     // 清空断开开关
     this.setState({ deviceIds: [], loading: false })
     SVGConfig.resetConfigStatue()
+    this.setState({
+      outLineResult: []
+    })
   }
 
   getSvg = lineId => {
@@ -146,6 +170,7 @@ export default class Secondary extends Component {
     const _this = this
     getSvg(lineId)
       .then(res => {
+        console.log(res)
         if (!res.svgUrl) {
           this.setState({ spinning: false, svgHtml: null })
           this.refSvg.innerHTML = null
@@ -153,8 +178,8 @@ export default class Secondary extends Component {
           return message.error("未获取到图模资源")
         }
         const svgUrl =
-          process.env.NODE_ENV === "development" ? "http://192.168.2.187:8080" : window.location.origin
-
+          process.env.NODE_ENV === "development" ? "http://192.168.1.178:28002" : window.location.origin
+        //http://192.168.1.115:28002    http://192.168.2.187:8080
         SVGConfig.loadSvg(
           "#svgapp",
           {
@@ -181,7 +206,9 @@ export default class Secondary extends Component {
         )
       })
       .catch(_err => {
-        this.setState({ spinning: false, svgHtml: null })
+        console.log("err", _err)
+        const { resultMsg, resultCode } = _err
+        this.setState({ spinning: false, svgHtml: null, lineInvalidReason: resultMsg, resultCode })
       })
   }
   // 区间转供分析
@@ -193,12 +220,130 @@ export default class Secondary extends Component {
     this.setState({ visible: false })
   }
 
+  changeVisibleInvalid = () => {
+    this.setState({
+      visibleInvalid: true
+    })
+  }
+
+  exportExcel = () => {
+    getExportTrData(this.state.outLineResult).then(res => {
+      const rdfIds = res.map(el => el.id) 
+      console.log("rdfIds", rdfIds)
+      window.open(`${process.env.REACT_APP_HOST}/${process.env.REACT_APP_BASEURL}/model/exportTrData?rdfIds=${rdfIds.join(",")}`)
+    })
+    // exportTrData(this.state.outLineResult).then(res => {
+    //   console.log("res", res)
+    //   // let blob = new Blob([res.data], {type: "application/vnd.ms-excel"})
+    //   // // const blob = res
+    //   // const reader = new FileReader()
+    //   // reader.readAsDataURL(blob)
+    //   // reader.onload = (e) => {
+    //   //   const a = document.createElement("a")
+    //   //   a.download = "20200707.xls"
+    //   //   // 后端设置的文件名称在res.headers的 "content-disposition": "form-data; name=\"attachment\"; filename=\"20181211191944.zip\"",
+    //   //   a.href = e.target.result
+    //   //   document.body.appendChild(a)
+    //   //   a.click()
+    //   //   document.body.removeChild(a)
+    //   // }
+
+    //   const link = document.createElement("a")
+    //   let blob = new Blob([res.data],{type: "application/vnd.ms-excel"})
+    //   //获取heads中的filename文件名
+    //   // let temp = res.headers["content-disposition"].split(";")[1].split("filename=")[1]
+    //   //对文件名乱码转义--【Node.js】使用iconv-lite解决中文乱码
+    //   // let iconv = require("iconv-lite") 
+    //   //     iconv.skipDecodeWarning = true//忽略警告
+    //   // let fileName = iconv.decode(temp, "gbk")
+    //   // console.log("fileName_",fileName)
+    //   // return
+    //   link.style.display = "none"
+    //   link.href = URL.createObjectURL(blob)
+    //   link.setAttribute("download", "fileName.xls")
+    //   // document.body.appendChild(link)
+    //   link.click()
+    //   // document.body.removeChild(link)
+
+    // //   let data = res.data
+    // //   if (data) {
+    // //     let attrs = res.headers["content-disposition"].split(";")
+    // // 　 // 获取文件名
+    // //     let fileName = ""
+    // //     // 不用管fileName在第几个位置，只要=前面是fileName,就取=后面的值
+    // //     for (let i = 0, l = attrs.length; i < l; i++) {
+    // //       let temp = attrs[i].split("=")
+    // //       if (temp.length > 1 && temp[0] === "fileName") {
+    // //         fileName = temp[1]
+    // //         break
+    // //       }
+    // //     }
+    // //     fileName = decodeURIComponent(fileName)
+     
+    // //     // 获取数据类型
+    // //     let type = res.headers["content-type"].split(";")[0]
+    // //     let blob = new Blob([res.data], { type: type })
+    // //     const a = document.createElement("a")
+    // //     // 创建URL
+    // //     const blobUrl = window.URL.createObjectURL(blob)
+    // //     a.download = "20200707.xlsx"
+    // //     a.href = blobUrl
+    // //     document.body.appendChild(a)
+     
+    // //     // 下载文件
+    // //     a.click()
+     
+    // //     // 释放内存
+    // //     URL.revokeObjectURL(blobUrl)
+    // //     document.body.removeChild(a)
+    //   // }
+    // }).catch(err => {
+    //   debugger
+    //   console.log("err", err)
+    // })
+  }
+
+  getOutlineResult = () => {
+    // this.state.outLineResult
+    getExportTrData(this.state.outLineResult).then(res => {
+      console.log("getExportTrData res", res)
+      this.setState({
+        outlineVisible: true,
+        outlineData: res
+      })
+    })
+  }
+  changeOutlineVisible = () => {
+    this.setState({
+      outlineVisible: false
+    })
+  }
+
+  handleLineInvalidOk = () => {
+    setLineInvalid(this.state.lineId).then(res => {
+      this.props.changeVisibleInvalid(true)
+      this.setState({
+        visibleInvalid: false,
+        lineInvalid: true
+      })
+    }).catch(_err => {
+      const { resultMsg } = _err
+      message.error(`设置无效报错原因: ${resultMsg}`)
+    })
+  }
+
+  handleLineInvalidCancel = () => {
+    this.setState({
+      visibleInvalid: false
+    })
+  }
+
   componentDidMount() {
     const {
-      currentNode: { id = "" }
+      currentNode: { id = "", name = "", invalid = false }
     } = this.props
     if (id && id !== this.state.lineId) {
-      this.setState({ lineId: id, deviceIds: [] })
+      this.setState({ lineId: id, deviceIds: [], lineName: name, lineInvalid: invalid, resultCode: invalid ? "2" : "0", outLineResult: [] })
       this.getSvg(id)
     }
   }
@@ -206,10 +351,10 @@ export default class Secondary extends Component {
   // 选择线路传递线路ID 会触发当前组件重绘
   componentDidUpdate() {
     const {
-      currentNode: { id = "" }
+      currentNode: { id = "", name = "", invalid = false }
     } = this.props
     if (id && id !== this.state.lineId) {
-      this.setState({ lineId: id, deviceIds: [] })
+      this.setState({ lineId: id, deviceIds: [], lineName: name, lineInvalid: invalid, resultCode: invalid ? "2" : "0", outLineResult: [] })
       this.getSvg(id)
     }
   }
@@ -225,8 +370,31 @@ export default class Secondary extends Component {
       analysis: { errors, results },
       loading = false,
       deviceIds,
-      visible
+      visible,
+      lineName,
+      lineInvalidReason,
+      lineInvalid,
+      resultCode,
+      visibleInvalid,
+      outLineResult,
+      outlineVisible,
+      outlineData
     } = this.state
+    const props = {
+      visibleInvalid,
+      lineName,
+      lineInvalidReason,
+      resultCode,
+      lineInvalid,
+      changeVisibleInvalid: this.changeVisibleInvalid,
+      handleLineInvalidOk: this.handleLineInvalidOk,
+      handleLineInvalidCancel: this.handleLineInvalidCancel,
+    }
+    const tableProps = {
+      outlineVisible,
+      outlineData,
+      changeOutlineVisible: this.changeOutlineVisible
+    }
     return (
       <Spin spinning={spinning}>
         <Container>
@@ -245,7 +413,26 @@ export default class Secondary extends Component {
                   <Button className="btn-height" type="primary" onClick={this.handleAnalogPowerOutage}>
                     停电模拟
                   </Button>
-                  <Button
+                  {
+                    outLineResult.length > 0 ?
+                      (<span className="btn-margin-h">
+                        <Button
+                          className="btn-height"
+                          type="primary"
+                          onClick={this.getOutlineResult}
+                        >
+                          受影响配变
+                      </Button>
+                        <Button
+                          className="btn-height"
+                          type="primary"
+                          onClick={this.exportExcel}
+                        >
+                          导出
+                      </Button>
+                      </span>) : ""
+                  }
+                  {/* <Button
                     className="btn-height"
                     type="success"
                     loading={loading}
@@ -253,7 +440,7 @@ export default class Secondary extends Component {
                     onClick={this.handleAnalysis}
                   >
                     转供分析
-                  </Button>
+                  </Button> */}
                   {/* <Popover
                     overlayClassName="analysis"
                     content={
@@ -294,14 +481,17 @@ export default class Secondary extends Component {
               ) : null
             }
             bordered={false}
-            style={{ background: "#172341", flex: 1 }}
+            style={{ background: "black", flex: 1 }} // #172341
             bodyStyle={{ height: "calc(100vh - 162px)", overflow: "hidden" }}
             className="v-card"
           >
-            {!svgHtml && <div className="no-data" />}
             <div id="svgapp" ref={node => (this.refSvg = node)} />
+            {!svgHtml && <LineNoData {...props} />}
             <DrawerAnalysis visible={visible} onDrawClose={this.handleDrawerClose} />
           </Card>
+          <OutlineTabel
+            {...tableProps}
+          />
         </Container>
       </Spin>
     )

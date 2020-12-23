@@ -1,0 +1,66 @@
+body,
+html {
+    padding: 0;
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+}
+
+.kdiv {
+    width: 100%;
+    height: 600px;
+    touch-action: none,
+}
+
+.topo_p {
+    position: absolute;
+}
+
+.busbar {
+    width: 5px;
+    height: 70px;
+    background-color: #fff;
+    border: none;
+}
+
+.toTopDiv {
+    border: solid 3px #fff;
+    border-left: none;
+    border-top: none;
+}
+
+.toBottomDiv {
+    border: solid 3px #fff;
+    border-left: none;
+    border-bottom: none;
+}
+
+.lineDiv {
+    border-top: solid 3px #fff;
+    height: 1px;
+}
+
+.substation,
+.feeder,
+.breaker,
+.disconnector {
+    width: 88.32px;
+    height: 88.32px;
+}
+
+.combine {
+    border: solid 3px #fff !important;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+}
+
+.topo_outside_feeder{
+    border-color: #FD7D3D !important;
+}
+
+p {
+    color:  #fff;
+}

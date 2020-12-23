@@ -21,33 +21,54 @@ const SVG_NORMAL = 0//正常状态
 const SVG_SELECT_POWER = 1//选电源中
 const SVG_CUT_LINE = 2//剪线中
 
+const normalColor = "#ff808e"//"#c8808e"
 
 //柱上断路器、断路器 
 // :['LoadBreakSwitch_30700000_4040010@1','LoadBreakSwitch_30700000_4040010@1']
+// const kBreakerStatues = {
+//   on: ["Breaker_11100000_2040010@1", "Breaker_30500000_4030010@1", "Breaker_30500000_4100010@1"],
+//   off: ["Breaker_11100000_2040011@0", "Breaker_30500000_4030011@0", "Breaker_30500000_4100011@0"]
+// }
 const kBreakerStatues = {
-  on: ["Breaker_11100000_2040010@1", "Breaker_30500000_4030010@1", "Breaker_30500000_4100010@1"],
-  off: ["Breaker_11100000_2040011@0", "Breaker_30500000_4030011@0", "Breaker_30500000_4100011@0"]
+  on: ["Breaker_PMS25_30500000_4100010@1", "Breaker_11100000_2040010@1", "Breaker_30500000_4030010@1", "Breaker_30500000_4100010@1", "Breaker_PMS25_11100000_2040010@1", "Breaker_PMS25_30500000_4030010@1"],
+  off: ["Breaker_PMS25_30500000_4100011@0", "Breaker_11100000_2040011@0", "Breaker_30500000_4030011@0", "Breaker_30500000_4100011@0", "Breaker_PMS25_11100000_2040011@0", "Breaker_PMS25_30500000_4030011@0"]
 }
 // 三工位隔离开关、 三工位开关、"CompositeSwitch_30500099_84030071@0"这种未知
+// const kCompositeSwitchStatues = {
+//   on: ["CompositeSwitch_30600007_4070013@1", "CompositeSwitch_30700002_4070010@1", "CompositeSwitch_30500099_84030070@1"],
+//   off: ["CompositeSwitch_30600007_4070014@0", "CompositeSwitch_30700002_4070011@0", "CompositeSwitch_30500099_84030071@0"],
+//   earth: ["CompositeSwitch_30600007_4070015@4", "CompositeSwitch_30700002_4070012@4"]
+// }
 const kCompositeSwitchStatues = {
-  on: ["CompositeSwitch_30600007_4070013@1", "CompositeSwitch_30700002_4070010@1", "CompositeSwitch_30500099_84030070@1"],
-  off: ["CompositeSwitch_30600007_4070014@0", "CompositeSwitch_30700002_4070011@0", "CompositeSwitch_30500099_84030071@0"],
-  earth: ["CompositeSwitch_30600007_4070015@4", "CompositeSwitch_30700002_4070012@4"]
+  on: ["CompositeSwitch_PMS25_30600007_4070013@1", "CompositeSwitch_PMS25_30700002_4070010@1", "CompositeSwitch_PMS25_30500099_84030070@1", "CompositeSwitch_30600007_4070013@1", "CompositeSwitch_30700002_4070010@1", "CompositeSwitch_30500099_84030070@1"],
+  off: ["CompositeSwitch_PMS25_30600007_4070014@0", "CompositeSwitch_PMS25_30700002_4070011@0", "CompositeSwitch_PMS25_30500099_84030071@0", "CompositeSwitch_30600007_4070014@0", "CompositeSwitch_30700002_4070011@0", "CompositeSwitch_30500099_84030071@0"]
 }
 // 柱上负荷开关
+// const kLoadBreakSwitchStatues = {
+//   on: ["LoadBreakSwitch_30700000_4040010@1", "LoadBreakSwitch_11200000_2050010@1"],
+//   off: ["LoadBreakSwitch_30700000_4040011@0", "LoadBreakSwitch_11200000_2050011@0"]
+// }
 const kLoadBreakSwitchStatues = {
-  on: ["LoadBreakSwitch_30700000_4040010@1", "LoadBreakSwitch_11200000_2050010@1"],
-  off: ["LoadBreakSwitch_30700000_4040011@0", "LoadBreakSwitch_11200000_2050011@0"]
+  on: ["LoadBreakSwitch_PMS25_30700000_4040010@1", "LoadBreakSwitch_PMS25_11200000_2050010@1", "LoadBreakSwitch_30700000_4040010@1", "LoadBreakSwitch_11200000_2050010@1"],
+  off: ["LoadBreakSwitch_PMS25_30700000_4040011@0", "LoadBreakSwitch_PMS25_11200000_2050011@0", "LoadBreakSwitch_30700000_4040011@0", "LoadBreakSwitch_11200000_2050011@0"]
 }
 // 熔断器
+// const kFuseStatues = {
+//   on: ["Fuse_11500000_2090010@1"],
+//   off: ["Fuse_11500000_2090011@0"]
+// }
 const kFuseStatues = {
-  on: ["Fuse_11500000_2090010@1"],
-  off: ["Fuse_11500000_2090011@0"]
+  on: ["Fuse_PMS25_11500000_2090010@1", "Fuse_PMS25_11500000_2090010@1", "Fuse_11500000_2090010@1", "Fuse_11500000_2090010@1"],
+  off: ["Fuse_PMS25_11500000_2090011@0", "Fuse_PMS25_11500000_2090011@0", "Fuse_11500000_2090011@0", "Fuse_11500000_2090011@0"]
 }
 // 熔断式隔离开关
+// const kDisconnectorStatues = {
+//   on: ["Disconnector_11300000_4050020@1", "Disconnector_11300000_2060010@1"],
+//   off: ["Disconnector_11300000_4050021@0", "Disconnector_11300000_2060011@0"]
+// }
 const kDisconnectorStatues = {
-  on: ["Disconnector_11300000_4050020@1", "Disconnector_11300000_2060010@1"],
-  off: ["Disconnector_11300000_4050021@0", "Disconnector_11300000_2060011@0"]
+  on: ["Disconnector_PMS25_11300000_4050020@1", "Disconnector_PMS25_11300000_2060010@1", "Disconnector_11300000_4050020@1", "Disconnector_11300000_2060010@1"],
+  off: ["Disconnector_PMS25_11300000_4050021@0", "Disconnector_PMS25_11300000_2060011@0", "Disconnector_11300000_4050021@0", "Disconnector_11300000_2060011@0"]
 }
 
 var svgConfig = {
@@ -412,9 +433,11 @@ function stopSelectPower () {
 */
 // 剪线回调 第一个参数是设备的ID，第二个参数是不是剪线设备，第三个参数是设备的状态是分(false)是合(true)
 function outUpdateCutLine (deviceId, statue) {
+  console.log("剪线回调")
   var tuyuan = document.getElementById(deviceId)
   var device = svgConfig.configs.devices[deviceId]
   if (device.type.type == "compositeswitch") {// 负荷开关
+    console.log("剪线回调 负荷开关")
     var compositeSwitch_statue = d3.select(tuyuan).select("use").attr("xlink:href").substr(1)
     if (statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kCompositeSwitchStatues.off[kCompositeSwitchStatues.on.indexOf(compositeSwitch_statue)])
@@ -422,6 +445,7 @@ function outUpdateCutLine (deviceId, statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kCompositeSwitchStatues.on[kCompositeSwitchStatues.off.indexOf(compositeSwitch_statue)])
     }
   } else if (device.type.type == "loadbreakswitch") {
+    console.log("剪线回调 loadbreakswitch")
     var loadbreakswitch_statue = d3.select(tuyuan).select("use").attr("xlink:href").substr(1)
     if (statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kLoadBreakSwitchStatues.off[kLoadBreakSwitchStatues.on.indexOf(loadbreakswitch_statue)])
@@ -429,6 +453,7 @@ function outUpdateCutLine (deviceId, statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kLoadBreakSwitchStatues.on[kLoadBreakSwitchStatues.off.indexOf(loadbreakswitch_statue)])
     }
   } else if (device.type.type == "fuse") {
+    console.log("剪线回调 fuse")
     var fuse_statue = d3.select(tuyuan).select("use").attr("xlink:href").substr(1)
     if (statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kFuseStatues.off[kFuseStatues.on.indexOf(fuse_statue)])
@@ -436,6 +461,7 @@ function outUpdateCutLine (deviceId, statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kFuseStatues.on[kFuseStatues.off.indexOf(fuse_statue)])
     }
   } else if (device.type.type == "disconnector") {
+    console.log("剪线回调 disconnector")
     var disconnector_statue = d3.select(tuyuan).select("use").attr("xlink:href").substr(1)
     if (statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kDisconnectorStatues.off[kDisconnectorStatues.on.indexOf(disconnector_statue)])
@@ -443,13 +469,17 @@ function outUpdateCutLine (deviceId, statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kDisconnectorStatues.on[kDisconnectorStatues.off.indexOf(disconnector_statue)])
     }
   } else if (device.type.type == "breaker") {//开关
+    console.log("剪线回调 开关")
     var breaker_statue = d3.select(tuyuan).select("use").attr("xlink:href").substr(1)
+    console.log("breaker_statue", breaker_statue)
+    console.log(tuyuan)
     if (statue) {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kBreakerStatues.off[kBreakerStatues.on.indexOf(breaker_statue)]) //alert("点击了确定");   
     } else {
       d3.select(tuyuan).select("use").attr("xlink:href", "#" + kBreakerStatues.on[kBreakerStatues.off.indexOf(breaker_statue)])
     }
   } else if (device.type.type == "aclinesegment" || device.type.type == "connline") {// 线路
+    console.log("剪线回调 线路")
     if (!statue) {
       d3.select(tuyuan).select("polyline").attr("userdata", "") //alert("点击了确定");
       // d3.select(tuyuan).select("polyline").style("stroke", "#fff"); 
@@ -473,7 +503,7 @@ function updateCutLine (deviceId) {
 function cutLineReminder () {
   svgConfig.clearTime()
   svgConfig.time = window.setInterval(function () {
-    var colors = ["#c8808e", "#eee"]
+    var colors = [normalColor, "#eee"]
     svgConfig.totalTime++
     if (svgConfig.totalTime <= 10) {
       for (var key in svgConfig.configs.devices) {
@@ -516,15 +546,18 @@ function startCutLine (callback) {
     if (svgConfig.configs.devices.hasOwnProperty(key)
       && !svgConfig.lone_device.hasOwnProperty(key)) {
       d3.select(svgConfig.configs.devices[key].g).on("click", function () {
+        console.log("点击")
         var deviceId = d3.select(this).attr("id")
         var device = svgConfig.configs.devices[deviceId]
         var statue = true
         if (device.type.type == "compositeswitch") {// 负荷开关
+          console.log("负荷开关")
           var compositeSwitch_statue = d3.select(this).select("use").attr("xlink:href").substr(1)
           if (kCompositeSwitchStatues.off.indexOf(compositeSwitch_statue) > -1) {
             statue = false
           }
         } else if (device.type.type == "loadbreakswitch") {//开关
+          console.log("开关")
           var loadbreakswitch_statue = d3.select(this).select("use").attr("xlink:href").substr(1)
           if (kLoadBreakSwitchStatues.off.indexOf(loadbreakswitch_statue) > -1) {
             statue = false
@@ -753,7 +786,7 @@ function updateRunPathsInColor () {
       for (var deviceId in powerRunPaths[powerId]) {
         if (powerRunPaths[powerId].hasOwnProperty(deviceId)) {
           var tuyuan = d3.select(powerRunPaths[powerId][deviceId].g)
-          var color = "#c8808e"
+          var color = normalColor
           var polys = tuyuan.selectAll("polyline")
           var uses = tuyuan.selectAll("use")
           var polygons = tuyuan.selectAll("polygon") //选不到不应该有
@@ -1126,7 +1159,7 @@ function findAllAccessNewEnergy (selectYaoCeCallBack) {
   var energyConsumer = d3.select("#app").select("svg").select("g#EnergyConsumer_Layer")
   var polys = energyConsumer.selectAll("g").selectAll("polyline")
   var uses = energyConsumer.selectAll("g").selectAll("use")
-  let color = "#c8808e"
+  let color = normalColor
   if (polys.size() > 0) polys.style("stroke", color)
   if (uses.size() > 0) {
     uses.style("fill", color)
@@ -1289,6 +1322,7 @@ function loadSvg (superNode, lineNodeData, responseResult, callback) {
       svg.attr("width", "100%")
       svg.attr("height", "100%")
       svg.select("g#BackGround_Layer").select("rect").style("fill", "none")
+      // svg.select("g#BackGround_Layer").select("rect").style("fill", "black")
       svg.selectAll("use").style("stroke-width", ".3")
       svg.selectAll("use").style("stroke", "#fff")
       svg.selectAll("use").style("fill", "#fff")

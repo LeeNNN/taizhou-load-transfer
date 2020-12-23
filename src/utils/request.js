@@ -29,7 +29,7 @@ service.interceptors.request.use(config => {
 // 处理请求回来的数据
 service.interceptors.response.use(data => {
   if (data.status === 200) {
-    return Promise.resolve(data.data)
+    return data //data.data
   } else {
     message.destroy()
     message.error("请求错误")
@@ -37,19 +37,32 @@ service.interceptors.response.use(data => {
   }
 })
 
-const request = (url, method = "GET", data = {}, headers = null) => {
+const request = (url, method = "GET", data = {}, headers = null, responseType=null) => {
   return new Promise((resolve, reject) => {
+    const req = {
+      url,
+      method: method.toUpperCase(),
+      data,
+      headers
+    }
+    if (responseType) {
+      req.responseType = responseType
+      req.headers = {
+        ...req.headers,
+        "Content-Type": "application/json; application/octet-stream; application/x-www-form-urlencoded"
+      }
+    }
+    console.log("req", req)
     service(
-      {
-        url,
-        method: method.toUpperCase(),
-        data,
-        headers
-      },
+      req,
       {
         cancelToken: source.token
       }
-    ).then(res => {
+    ).then(response => {
+      const {data: res} = response
+      if (typeof res === "string") {
+        return resolve(response)
+      }
       if (url.indexOf(".svg") > -1) {
         return resolve(res)
       }
@@ -60,11 +73,13 @@ const request = (url, method = "GET", data = {}, headers = null) => {
         message.error(res.resultMsg)
         reject(res)
       }
+    }).catch(error => {
+      reject(error)
     })
   })
 }
 
-request.post = (url, data = {}) => request(url, "POST", data)
+request.post = (url, data = {}, responseType) => request(url, "POST", data, {}, responseType)
 request.get = (url, data = {}) => request(url, "GET", data)
 
 export const requestSvg = (url, data = {}) => {

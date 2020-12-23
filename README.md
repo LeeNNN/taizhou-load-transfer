@@ -76,3 +76,6 @@ node_modules/echarts2/lib/chart/tree/TreeView.js
 ##### "proxy": "http://192.168.2.195:8080/"
 
 ##### "proxy": "http://192.168.2.40:18800/"
+
+##### "proxy": "http://192.168.2.180:28002/"  chi shu pei
+# http://192.168.2.88:8080/      http://192.168.2.37:18002/

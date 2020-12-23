@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef, useCallback } from "react"
 import { symbolSimpleTypes as symbolTypes, nameTypes as types } from "@/utils/constant"
 import { Message } from "antd"
-import echarts from "echarts2/lib/echarts"
-import "echarts2/lib/chart/tree"
-import "echarts2/lib/component/tooltip"
-import "echarts2/lib/component/title"
+// import echarts from "echarts2/lib/echarts"
+// import "echarts2/lib/chart/tree"
+// import "echarts2/lib/component/tooltip"
+// import "echarts2/lib/component/title"
+import echarts from "echarts/lib/echarts"
+import "echarts/lib/chart/tree"
+import "echarts/lib/component/tooltip"
+import "echarts/lib/component/title"
 import "zrender/lib/svg/svg"
 
 const options = {
